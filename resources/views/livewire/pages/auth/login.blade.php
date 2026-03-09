@@ -1,0 +1,141 @@
+<?php
+
+use App\Livewire\Forms\LoginForm;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Layout;
+use Livewire\Volt\Component;
+
+new #[Layout('layouts.guest')] class extends Component
+{
+    public LoginForm $form;
+
+    public string $authError = '';
+
+    public function login(): void
+    {
+        $this->authError = '';
+        $this->validate();
+
+        try {
+            $this->form->authenticate();
+        } catch (ValidationException $e) {
+            $this->authError = $e->errors()->first('form.email') ?: __('auth.failed');
+            return;
+        }
+
+        Session::regenerate();
+        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+    }
+};
+?>
+
+<div class="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-gray-100 to-gray-200 p-4 relative">
+
+    {{-- Спиннер при входе (как при загрузке фото) --}}
+    <div wire:loading.flex
+         wire:target="login"
+         class="fixed inset-0 z-[200] flex items-center justify-center bg-white/90 backdrop-blur-sm"
+         aria-live="polite"
+         aria-label="{{ __('app.please_wait') }}">
+        @include('components.upload-loading-spinner-box')
+    </div>
+
+    <div class="w-full max-w-md space-y-8">
+        {{-- Logotips — как в Fleet Manager: лого 96×96, снизу текст --}}
+        <div class="flex flex-col items-center animate-fade-in">
+            <img src="{{ asset('images/icons/cargo-logo.png') }}" alt="{{ config('app.name', 'Cargo Trans') }}" class="rounded-2xl shadow-md mb-4 object-cover" style="width: {{ config('app.logo.width', 96) }}px; height: {{ config('app.logo.height', 96) }}px;">
+            <h1 class="text-3xl font-bold text-gray-800 tracking-tight">{{ config('app.name', 'Cargo Trans') }}</h1>
+        </div>
+
+        {{-- Pieteikšanās forma --}}
+        <div class="bg-white rounded-2xl shadow-lg p-6 space-y-6 animate-slide-up">
+            <x-auth-session-status class="mb-4" :status="session('status')" />
+
+            @if ($authError || session('auth_error'))
+                <div class="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 mb-4" role="alert">
+                    {{ $authError ?: session('auth_error') }}
+                </div>
+            @endif
+
+            <form wire:submit.prevent="login" action="{{ route('login.post') }}" method="POST" class="space-y-4">
+                @csrf
+                {{-- E-pasts --}}
+                <div>
+                    <x-input-label for="email" :value="__('Email')" />
+                    <x-text-input
+                        wire:model="form.email"
+                        name="email"
+                        id="email"
+                        type="email"
+                        value="{{ old('email', $form->email) }}"
+                        required
+                        autofocus
+                        autocomplete="username"
+                        class="block w-full mt-1 rounded-lg border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200"
+                        placeholder="you@example.com"
+                    />
+                    <x-input-error :messages="$errors->get('form.email')" class="mt-2" />
+                </div>
+
+                {{-- Parole --}}
+                <div>
+                    <x-input-label for="password" :value="__('Password')" />
+                    <x-text-input
+                        wire:model="form.password"
+                        name="password"
+                        id="password"
+                        type="password"
+                        required
+                        autocomplete="current-password"
+                        class="block w-full mt-1 rounded-lg border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200"
+                        placeholder="••••••••"
+                    />
+                    <x-input-error :messages="$errors->get('form.password')" class="mt-2" />
+                </div>
+
+                {{-- Nosūtīt --}}
+                <div class="flex items-center justify-end">
+                    <button
+                        type="submit"
+                        wire:loading.attr="disabled"
+                        wire:target="login"
+                        class="relative inline-flex items-center justify-center px-6 py-2 text-white font-semibold rounded-lg bg-blue-600 hover:bg-blue-700 transition disabled:opacity-70 disabled:cursor-not-allowed min-w-[180px]"
+                    >
+                        {{-- Spinner ielādes laikā --}}
+                        <svg wire:loading wire:target="login" class="animate-spin h-5 w-5 mr-2 text-white absolute left-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                        </svg>
+
+                        {{-- Teksts — mainās ielādes laikā --}}
+                        <span wire:loading.remove wire:target="login">{{ __('app.auth.login_button') }}</span>
+                        <span wire:loading wire:target="login" class="inline-flex items-center gap-2">
+                            <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
+                            {{ __('app.auth.login_loading') }}
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        {{-- Kājene --}}
+        <p class="text-xs text-gray-500 text-center mt-6">
+            © {{ now()->year }} {{ config('app.name', 'Cargo Trans') }}
+        </p>
+    </div>
+
+    {{-- Анимации --}}
+    <style>
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slide-up {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fade-in 0.6s ease-out both; }
+        .animate-slide-up { animation: slide-up 0.6s ease-out both; }
+    </style>
+</div>

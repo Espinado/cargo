@@ -1,0 +1,231 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ========================== */
+/* Driver App Base UI Styles  */
+/* ========================== */
+
+:root {
+    --driver-bg: #f5f7fa;
+    --driver-card-bg: #ffffff;
+    --driver-primary: #2563eb; /* blue-600 */
+    --driver-primary-light: #dbeafe;
+    --driver-danger: #dc2626;
+    --driver-success: #16a34a;
+    --driver-text: #1f2937; /* gray-800 */
+    --driver-muted: #6b7280; /* gray-500 */
+
+    --radius-lg: 14px;
+    --radius-md: 10px;
+
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+    --shadow-md: 0 2px 6px rgba(0,0,0,0.12);
+}
+
+/* Портрет: страница по высоте контента, без пустого блока внизу */
+.driver-app-root,
+.driver-app-root body {
+    min-height: auto !important;
+    height: auto !important;
+}
+
+/* Контент на всю ширину экрана в портрете (sm в driver = 820px) */
+.driver-app-root main,
+.driver-app-root main > div {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+@media (min-width: 820px) {
+    .driver-app-root main > div {
+        width: auto !important;
+        max-width: 520px !important;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+/* Body style */
+body {
+    background-color: var(--driver-bg);
+    color: var(--driver-text);
+    font-family: 'Inter', sans-serif;
+}
+
+/* Driver card */
+.driver-card {
+    background: var(--driver-card-bg);
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+    box-shadow: var(--shadow-sm);
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--driver-primary);
+    color: white;
+    padding: 0.7rem 1rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    text-align: center;
+}
+
+.btn-primary:hover {
+    background-color: #1e40af; /* blue-800 */
+}
+
+/* Input */
+.driver-input {
+    width: 100%;
+    padding: 0.75rem;
+    background: white;
+    border: 1px solid #d1d5db;
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+}
+
+.driver-input:focus {
+    border-color: var(--driver-primary);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--driver-primary-light);
+}
+
+/* Bottom navigation */
+.driver-nav-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.78rem;
+    color: var(--driver-muted);
+}
+
+.driver-nav-link.active {
+    color: var(--driver-primary);
+}
+@layer base {
+  /* Driver app: чуть крупнее по умолчанию */
+  html { font-size: 16.5px; }
+
+  /* На десктопе при тестах — ещё крупнее */
+  @media (min-width: 1024px) {
+    html { font-size: 18px; }
+  }
+}
+
+/* ========================== */
+/* Mobile: крупнее всё (кнопки, шрифты) — только для водителей */
+/* Breakpoint 820px = sm в tailwind.driver.config.js */
+/* ========================== */
+@media (max-width: 819px) {
+  .driver-app {
+    --driver-touch-min: 48px;
+    --driver-text-base: 1.125rem;
+    --driver-btn-py: 1rem;
+    --driver-btn-px: 1.25rem;
+  }
+
+  html.driver-app-root {
+    font-size: 18px;
+  }
+
+  /* Крупнее базовые кнопки и инпуты */
+  .driver-app .btn-primary {
+    padding: var(--driver-btn-py) var(--driver-btn-px);
+    font-size: var(--driver-text-base);
+    min-height: var(--driver-touch-min);
+  }
+
+  .driver-app .driver-input {
+    padding: 1rem;
+    font-size: var(--driver-text-base);
+    min-height: var(--driver-touch-min);
+  }
+
+  .driver-app .driver-nav-link {
+    font-size: 1rem;
+  }
+
+  /* Все кнопки в приложении водителя — крупнее и удобнее для нажатия */
+  .driver-app button:not([class*="text-"]),
+  .driver-app [type="submit"]:not([class*="text-"]),
+  .driver-app [role="button"]:not([class*="text-"]) {
+    min-height: var(--driver-touch-min);
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    font-size: var(--driver-text-base);
+  }
+
+  .driver-app button.text-xs,
+  .driver-app [type="submit"].text-xs,
+  .driver-app a.text-xs.button-like {
+    font-size: 0.95rem;
+    padding: 0.6rem 0.75rem;
+  }
+
+  /* Инпуты */
+  .driver-app input[type="text"],
+  .driver-app input[type="number"],
+  .driver-app input[type="email"],
+  .driver-app input[type="tel"],
+  .driver-app input[type="password"] {
+    padding: 0.875rem 1rem;
+    font-size: var(--driver-text-base);
+    min-height: var(--driver-touch-min);
+  }
+
+  /* Крупнее мелкий текст */
+  .driver-app .text-xs {
+    font-size: 0.9375rem; /* 15px при 18px base */
+  }
+
+  .driver-app .text-sm {
+    font-size: 1.0625rem; /* ~17px */
+  }
+
+  .driver-app .text-lg {
+    font-size: 1.25rem;
+  }
+
+  .driver-app .text-xl {
+    font-size: 1.5rem;
+  }
+
+  .driver-app .text-2xl {
+    font-size: 1.75rem;
+  }
+
+  /* Заголовки и карточки */
+  .driver-app h1, .driver-app .text-xl.font-bold {
+    font-size: 1.5rem;
+  }
+
+  .driver-app h2, .driver-app .text-lg.font-bold,
+  .driver-app .text-lg.font-semibold {
+    font-size: 1.25rem;
+  }
+
+  /* Шапка: кнопка «Назад» — крупнее для нажатия */
+  .driver-app .sticky.top-0 button.w-9 {
+    width: 2.75rem;
+    height: 2.75rem;
+    min-width: var(--driver-touch-min);
+    min-height: var(--driver-touch-min);
+  }
+
+  /* Нижняя навигация — крупнее иконки и подписи */
+  .driver-app .fixed.bottom-0 .flex.justify-around a,
+  .driver-app .fixed.bottom-0 .flex.justify-around button {
+    font-size: 1rem;
+    padding: 0.5rem 0.25rem;
+  }
+
+  .driver-app .fixed.bottom-0 .text-2xl {
+    font-size: 2rem;
+  }
+
+  /* Тосты */
+  .driver-app #driver-toast-root [role="alert"] {
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+  }
+}

@@ -1,0 +1,90 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class Truck extends Model
+{
+    use HasFactory;
+
+    protected $table = 'trucks';
+
+    protected $fillable = [
+        'brand',
+        'model',
+        'can_available',
+        'plate',
+        'year',
+        'company_id',
+        'inspection_issued',
+        'inspection_expired',
+        'insurance_number',
+        'insurance_issued',
+        'insurance_expired',
+        'insurance_company',
+        'license_number',
+        'license_issued',
+        'license_expired',
+        'mapon_box_id',
+        'mapon_unit_id',
+        'vin',
+        'status',
+        'is_active',
+        'tech_passport_nr',
+        'tech_passport_issued',
+        'tech_passport_expired',
+        'tech_passport_photo',
+    ];
+
+    protected $casts = [
+        'inspection_issued' => 'date',
+        'inspection_expired' => 'date',
+        'insurance_issued' => 'date',
+        'insurance_expired' => 'date',
+        'tech_passport_issued' => 'date',
+        'tech_passport_expired' => 'date',
+        'license_issued'  => 'date',
+        'license_expired' => 'date',
+    ];
+
+    public function getDisplayNameAttribute(): string
+    {
+        return "{$this->brand} {$this->model} ({$this->plate})";
+    }
+
+    /**
+     * URL фото техпаспорта (локальный storage или внешний URL).
+     */
+    public function getTechPassportPhotoUrlAttribute(): ?string
+    {
+        $path = $this->tech_passport_photo;
+        if (!$path) {
+            return null;
+        }
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+        $path = str_replace('public/', '', $path);
+        return asset('storage/' . $path);
+    }
+
+    public function vehicleRuns(): HasMany
+    {
+        return $this->hasMany(\App\Models\VehicleRun::class);
+    }
+
+    public function odometerEvents(): HasMany
+    {
+        // ⚠️ проверь название модели: если она TruckOdometerEvent — оставь так
+        return $this->hasMany(\App\Models\TruckOdometerEvent::class);
+    }
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Company::class);
+    }
+}

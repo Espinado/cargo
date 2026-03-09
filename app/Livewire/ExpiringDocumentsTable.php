@@ -1,0 +1,307 @@
+<?php
+
+namespace App\Livewire;
+
+use Livewire\Component;
+use Livewire\WithPagination;
+use App\Models\Driver;
+use App\Models\Truck;
+use App\Models\Trailer;
+use App\Models\TripCargo;
+use App\Models\Company;
+use Carbon\Carbon;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
+use Illuminate\Pagination\Paginator;
+
+class ExpiringDocumentsTable extends Component
+{
+    use WithPagination;
+
+    public $search = '';
+    public $perPage = 10;
+    public $sortField = 'expiry_date';
+    public $sortDirection = 'asc';
+
+    protected $queryString = ['search', 'perPage', 'sortField', 'sortDirection'];
+
+    public function updatingSearch() { $this->resetPage(); }
+    public function updatingPerPage() { $this->resetPage(); }
+
+    public function sortBy(string $field)
+    {
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortField = $field;
+            $this->sortDirection = 'asc';
+        }
+
+        $this->resetPage();
+    }
+
+    protected function safeParseDate($value): ?Carbon
+    {
+        if (empty($value)) return null;
+
+        try {
+            if (is_numeric($value) && strlen((string) $value) <= 10) {
+                $dt = Carbon::createFromTimestamp((int) $value);
+            } else {
+                $dt = Carbon::parse($value);
+            }
+        } catch (\Throwable $e) {
+            return null;
+        }
+
+        if ($dt->year < 1900 || $dt->year > 2100) return null;
+
+        return $dt->startOfDay();
+    }
+
+    protected function getCompanyId($model): int
+    {
+        // ✅ совместимость: если где-то ещё осталось поле "company"
+        return (int) ($model->company_id ?? $model->company ?? 0);
+    }
+
+    protected function getCompanyName($companiesById, int $companyId): string
+    {
+        return $companyId ? ($companiesById[$companyId] ?? '—') : '—';
+    }
+
+    public function collectItems(): Collection
+    {
+        $today = Carbon::today();
+        $deadline = $today->copy()->addDays(30);
+
+        $items = collect();
+
+        // ✅ 1 запрос на компании
+        $companiesById = Company::query()
+            ->select('id', 'name')
+            ->pluck('name', 'id'); // [id => name]
+
+        // =======================
+        // DRIVERS
+        // =======================
+        Driver::select(
+            'id', 'first_name', 'last_name', 'pers_code', 'status', 'is_active', 'company_id',
+            'license_end', 'code95_end', 'permit_expired', 'medical_expired', 'declaration_expired'
+        )->get()->each(function ($d) use ($today, $deadline, $items, $companiesById) {
+
+            $docs = [
+                'License'     => $d->license_end,
+                '95 Code'     => $d->code95_end ?? ($d->{'95code_end'} ?? null),
+                'Permit'      => $d->permit_expired,
+                'Medical'     => $d->medical_expired,
+                'Declaration' => $d->declaration_expired,
+            ];
+
+            $companyId = $this->getCompanyId($d);
+            $companyName = $this->getCompanyName($companiesById, $companyId);
+
+            foreach ($docs as $docName => $dateVal) {
+                $expiry = $this->safeParseDate($dateVal);
+                if (!$expiry) continue;
+                if ($expiry->gt($deadline)) continue;
+
+                $daysLeft = $today->diffInDays($expiry, false);
+                if (abs($daysLeft) > 10000) continue;
+
+                $items->push((object) [
+                    'type'        => 'Driver',
+                    'name'        => "{$d->first_name} {$d->last_name} ({$d->pers_code})",
+                    'document'    => $docName,
+                    'expiry_date' => $expiry,
+                    'days_left'   => $daysLeft,
+                    'company_id'  => $companyId,
+                    'company'     => $companyName,
+                    'status'      => $d->status,
+                    'is_active'   => (bool) $d->is_active,
+                    'id'          => $d->id,
+                ]);
+            }
+        });
+
+        // =======================
+        // TRUCKS
+        // =======================
+        Truck::select(
+            'id', 'brand', 'model', 'plate', 'status', 'is_active',
+            // ✅ если есть company_id — отлично; если нет, Eloquent всё равно вернёт null
+            'company_id',
+            // ⚠️ если в таблице ещё company — это поле просто не выберется, но accessor getCompanyId() умеет
+            'inspection_expired', 'insurance_expired', 'tech_passport_expired'
+        )->get()->each(function ($t) use ($today, $deadline, $items, $companiesById) {
+
+            $docs = [
+                'Inspection'    => $t->inspection_expired,
+                'Insurance'     => $t->insurance_expired,
+                'Tech passport' => $t->tech_passport_expired,
+            ];
+
+            $companyId = $this->getCompanyId($t);
+            $companyName = $this->getCompanyName($companiesById, $companyId);
+
+            foreach ($docs as $docName => $dateVal) {
+                $expiry = $this->safeParseDate($dateVal);
+                if (!$expiry) continue;
+                if ($expiry->gt($deadline)) continue;
+
+                $daysLeft = $today->diffInDays($expiry, false);
+                if (abs($daysLeft) > 10000) continue;
+
+                $items->push((object) [
+                    'type'        => 'Truck',
+                    'name'        => "{$t->brand} {$t->model} ({$t->plate})",
+                    'document'    => $docName,
+                    'expiry_date' => $expiry,
+                    'days_left'   => $daysLeft,
+                    'company_id'  => $companyId,
+                    'company'     => $companyName,
+                    'status'      => $t->status,
+                    'is_active'   => (bool) $t->is_active,
+                    'id'          => $t->id,
+                ]);
+            }
+        });
+
+        // =======================
+        // TRAILERS
+        // =======================
+        Trailer::select(
+            'id', 'brand', 'plate', 'status', 'is_active',
+            'company_id',
+            'inspection_expired', 'insurance_expired', 'tir_expired', 'tech_passport_expired'
+        )->get()->each(function ($tr) use ($today, $deadline, $items, $companiesById) {
+
+            $docs = [
+                'Inspection'    => $tr->inspection_expired,
+                'Insurance'     => $tr->insurance_expired,
+                'TIR'           => $tr->tir_expired,
+                'Tech passport' => $tr->tech_passport_expired,
+            ];
+
+            $companyId = $this->getCompanyId($tr);
+            $companyName = $this->getCompanyName($companiesById, $companyId);
+
+            foreach ($docs as $docName => $dateVal) {
+                $expiry = $this->safeParseDate($dateVal);
+                if (!$expiry) continue;
+                if ($expiry->gt($deadline)) continue;
+
+                $daysLeft = $today->diffInDays($expiry, false);
+                if (abs($daysLeft) > 10000) continue;
+
+                $items->push((object) [
+                    'type'        => 'Trailer',
+                    'name'        => "{$tr->brand} ({$tr->plate})",
+                    'document'    => $docName,
+                    'expiry_date' => $expiry,
+                    'days_left'   => $daysLeft,
+                    'company_id'  => $companyId,
+                    'company'     => $companyName,
+                    'status'      => $tr->status,
+                    'is_active'   => (bool) $tr->is_active,
+                    'id'          => $tr->id,
+                ]);
+            }
+        });
+
+        // =======================
+        // INVOICES (Payment terms)
+        // company = trips.expeditor_id (пока так)
+        // =======================
+        TripCargo::query()
+            ->select('id', 'payer_type_id', 'payment_terms', 'trip_id', 'inv_nr', 'inv_file')
+            ->whereNotNull('payment_terms')
+            ->whereNotNull('inv_nr')
+            ->where('inv_nr', '!=', '')
+            ->whereNotNull('inv_file')
+            ->where('inv_file', '!=', '')
+            ->with(['trip:id,expeditor_id'])
+            ->get()
+            ->each(function ($c) use ($today, $deadline, $items, $companiesById) {
+
+                $expiry = $this->safeParseDate($c->payment_terms);
+                if (!$expiry) return;
+                if ($expiry->gt($deadline)) return;
+
+                $daysLeft = $today->diffInDays($expiry, false);
+
+                $companyId = (int) ($c->trip?->expeditor_id ?? 0);
+                $companyName = $this->getCompanyName($companiesById, $companyId);
+
+                $color =
+                    $daysLeft < 0 ? 'rose' :
+                    ($daysLeft <= 10 ? 'red' :
+                    ($daysLeft <= 20 ? 'orange' :
+                    ($daysLeft <= 30 ? 'yellow' : 'white')));
+
+                $items->push((object) [
+                    'type'        => 'Invoice',
+                    'name'        => !empty($c->inv_nr) ? $c->inv_nr : ('INV-' . $c->id),
+                    'inv_nr'      => $c->inv_nr,
+                    'document'    => 'Payment terms',
+                    'expiry_date' => $expiry,
+                    'days_left'   => $daysLeft,
+                    'company_id'  => $companyId,
+                    'company'     => $companyName,
+                    'status'      => $color,
+                    'is_active'   => true,
+                    'id'          => $c->id,
+                ]);
+            });
+
+        return $items->values();
+    }
+
+    public function render()
+    {
+        $all = $this->collectItems();
+
+        if (!empty($this->search)) {
+            $needle = mb_strtolower($this->search);
+
+            $all = $all->filter(fn ($it) =>
+                str_contains(mb_strtolower($it->type), $needle) ||
+                str_contains(mb_strtolower($it->name), $needle) ||
+                str_contains(mb_strtolower($it->document), $needle) ||
+                str_contains(mb_strtolower($it->company ?? ''), $needle)
+            )->values();
+        }
+
+        $dirDesc = $this->sortDirection === 'desc';
+        $all = $all->sortBy(function ($it) {
+            $f = $this->sortField;
+            if ($f === 'expiry_date') return $it->expiry_date->timestamp;
+
+            return isset($it->{$f})
+                ? (is_string($it->{$f}) ? mb_strtolower($it->{$f}) : $it->{$f})
+                : null;
+        }, SORT_REGULAR, $dirDesc)->values();
+
+        $page = Paginator::resolveCurrentPage();
+        $perPage = (int) $this->perPage;
+        $slice = $all->slice(($page - 1) * $perPage, $perPage)->values();
+
+        if ($slice->isEmpty() && $page > 1) {
+            $this->resetPage();
+            $page = 1;
+            $slice = $all->slice(0, $perPage)->values();
+        }
+
+        $paginator = new LengthAwarePaginator(
+            $slice,
+            $all->count(),
+            $perPage,
+            $page,
+            ['path' => Paginator::resolveCurrentPath()]
+        );
+
+        return view('livewire.expiring-documents-table', [
+            'items' => $paginator,
+        ])->layout('layouts.app');
+    }
+}
