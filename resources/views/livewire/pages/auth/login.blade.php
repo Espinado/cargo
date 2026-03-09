@@ -20,7 +20,7 @@ new #[Layout('layouts.guest')] class extends Component
         try {
             $this->form->authenticate();
         } catch (ValidationException $e) {
-            $this->authError = $e->errors()->first('form.email') ?: __('auth.failed');
+            $this->authError = data_get($e->errors(), 'form.email.0', __('auth.failed'));
             return;
         }
 
