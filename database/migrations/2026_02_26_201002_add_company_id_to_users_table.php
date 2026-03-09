@@ -13,8 +13,7 @@ return new class extends Migration {
                     ->nullable()
                     ->after('id')
                     ->constrained('companies')
-                    ->nullOnDelete()
-                    ->index();
+                    ->nullOnDelete();
             }
 
             // если у тебя уже есть role — НЕ добавляй
