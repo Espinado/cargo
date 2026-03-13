@@ -49,30 +49,42 @@ class NotikumiEventsSeeder extends Seeder
                 'odometer_km'  => $odoStart,
                 'source'       => TruckOdometerEvent::SOURCE_MANUAL,
                 'occurred_at'  => $startDate,
+                'note'         => 'Izbraukšana no garāžas',
             ]);
             $created++;
 
             $steps = $trip->steps;
             $lastOdo = $odoStart;
             $stepTime = $startDate->copy();
+
             foreach ($steps as $step) {
                 $segmentKm = rand(50, 200);
                 $odoCompleted = $step->odo_completed_km ?? ($lastOdo + $segmentKm);
                 $lastOdo = (float) $odoCompleted;
                 $stepTime = $stepTime->addHours(rand(2, 8));
+                $completedAt = $step->completed_at ?? $stepTime;
 
-                TruckOdometerEvent::create([
-                    'truck_id'      => $trip->truck_id,
-                    'driver_id'     => $trip->driver_id,
-                    'trip_id'       => $trip->id,
-                    'trip_step_id'  => $step->id,
-                    'type'          => TruckOdometerEvent::TYPE_STEP,
-                    'odometer_km'   => $odoCompleted,
-                    'source'        => TruckOdometerEvent::SOURCE_MANUAL,
-                    'occurred_at'   => $step->completed_at ?? $stepTime,
-                    'step_status'   => TripStepStatus::COMPLETED->value,
-                ]);
-                $created++;
+                // Для части шагов — несколько событий (изменения статуса), чтобы в Notikumi были «Solis: Ceļā», «Solis: Pabeigts» и т.д.
+                $withStatusChanges = (count($steps) <= 4 && $step->order <= 2) || rand(0, 1) === 0;
+                $statusSequence = $withStatusChanges
+                    ? [TripStepStatus::ON_THE_WAY, TripStepStatus::ARRIVED, TripStepStatus::COMPLETED]
+                    : [TripStepStatus::COMPLETED];
+
+                foreach ($statusSequence as $i => $status) {
+                    $occurred = $completedAt->copy()->subMinutes((count($statusSequence) - 1 - $i) * 20);
+                    TruckOdometerEvent::create([
+                        'truck_id'      => $trip->truck_id,
+                        'driver_id'     => $trip->driver_id,
+                        'trip_id'       => $trip->id,
+                        'trip_step_id'  => $step->id,
+                        'type'          => TruckOdometerEvent::TYPE_STEP,
+                        'odometer_km'   => $odoCompleted - (count($statusSequence) - 1 - $i) * 15,
+                        'source'        => TruckOdometerEvent::SOURCE_MANUAL,
+                        'occurred_at'   => $occurred,
+                        'step_status'   => $status->value,
+                    ]);
+                    $created++;
+                }
 
                 if ($step->odo_completed_km === null) {
                     $step->update(['odo_completed_km' => $odoCompleted]);
@@ -87,6 +99,7 @@ class NotikumiEventsSeeder extends Seeder
                 'odometer_km'  => $odoEnd,
                 'source'       => TruckOdometerEvent::SOURCE_MANUAL,
                 'occurred_at'  => $endDate,
+                'note'         => 'Atgriešanās garāžā',
             ]);
             $created++;
         }
@@ -98,24 +111,39 @@ class NotikumiEventsSeeder extends Seeder
             ->limit(25)
             ->get();
 
+        $expenseDescriptions = [
+            TripExpenseCategory::FUEL->value => 'Dīzeļdegviela, degvielas uzpilde',
+            TripExpenseCategory::TOLL->value => 'Ceļa nodeva (vignete)',
+            TripExpenseCategory::PARKING->value => 'Parkēšana pie noliktavas',
+            TripExpenseCategory::ADBLUE->value => 'AdBlue uzpilde',
+        ];
+
         foreach ($tripsWithExpenses as $trip) {
             $cats = [
                 TripExpenseCategory::FUEL,
                 TripExpenseCategory::TOLL,
                 TripExpenseCategory::PARKING,
+                TripExpenseCategory::ADBLUE,
             ];
             $cat = $cats[array_rand($cats)];
             $date = $trip->start_date
                 ? Carbon::parse($trip->start_date)->addDays(rand(0, 2))
                 : now()->subDays(rand(1, 20));
+            $odo = $trip->odo_start_km ? $trip->odo_start_km + rand(100, 500) : null;
+            $amount = round(rand(20, 200) + rand(0, 99) / 100, 2);
+            $liters = in_array($cat, [TripExpenseCategory::FUEL, TripExpenseCategory::ADBLUE], true)
+                ? round(rand(30, 150) + rand(0, 99) / 100, 2)
+                : null;
+
             TripExpense::create([
                 'trip_id'       => $trip->id,
                 'category'      => $cat->value,
                 'expense_date'  => $date,
-                'amount'        => round(rand(20, 200) + rand(0, 99) / 100, 2),
+                'amount'        => $amount,
                 'currency'      => $trip->currency ?? 'EUR',
-                'odometer_km'   => $trip->odo_start_km ? $trip->odo_start_km + rand(100, 500) : null,
-                'description'   => 'Seeder: ' . $cat->value,
+                'odometer_km'   => $odo,
+                'liters'        => $liters,
+                'description'   => $expenseDescriptions[$cat->value] ?? $cat->value,
             ]);
         }
 
