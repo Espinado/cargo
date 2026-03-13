@@ -52,7 +52,7 @@ class TrailerFactory extends Factory
             // ⚙️ Статус и принадлежность
             'status'    => 1,
             'is_active' => true,
-            'company_id' => $faker->numberBetween(1, 5),
+            'company_id' => \App\Models\Company::query()->inRandomOrder()->value('id'),
         ];
     }
 }

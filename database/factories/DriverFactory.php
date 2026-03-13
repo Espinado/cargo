@@ -118,8 +118,8 @@ class DriverFactory extends Factory
             'status'    => 1,
             'is_active' => true,
 
-            // 🔗 Привязка к компании-экспедитору
-            'company_id' => $faker->numberBetween(1, 5),
+            // 🔗 Привязка к компании (только существующий id)
+            'company_id' => \App\Models\Company::query()->inRandomOrder()->value('id'),
         ];
     }
 }
