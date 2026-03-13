@@ -136,6 +136,7 @@ class EventsTable extends Component
             ->leftJoin('drivers as d', 'd.id', '=', 'toe.driver_id')
             ->leftJoin('trucks as tr', 'tr.id', '=', 'toe.truck_id')
             ->leftJoin('trips as t', 't.id', '=', 'toe.trip_id')
+            ->leftJoin('trip_steps as ts', 'ts.id', '=', 'toe.trip_step_id')
             ->select([
                 DB::raw("'event' as row_kind"),
                 'toe.id as id',
@@ -145,6 +146,11 @@ class EventsTable extends Component
                 't.id as trip_id',
                 't.odo_start_km as trip_odo_start_km',
                 't.odo_end_km as trip_odo_end_km',
+
+                // Step info (для подписи «какой именно шаг»)
+                'toe.trip_step_id as trip_step_id',
+                'ts.address as step_address',
+                'ts.type as step_type',
 
                 // Expense-only поля (всегда NULL для events)
                 DB::raw('NULL as expense_category'),
@@ -196,6 +202,11 @@ class EventsTable extends Component
                 'te.currency as te_currency',
                 'te.liters as te_liters',
                 'te.description as te_description',
+
+                // Step info (для совместимости с union)
+                DB::raw('NULL as trip_step_id'),
+                DB::raw('NULL as step_address'),
+                DB::raw('NULL as step_type'),
 
                 // Odometer / timestamps / step
                 'te.odometer_km as odometer_km',

@@ -204,14 +204,21 @@
                 $typeLabel = null;
                 $badgeClass = null;
 
-                        if ($isExpenseRow) {
-                            $typeLabel = __('app.stats.events.badge_expense');
+                if ($isExpenseRow) {
+                    $typeLabel = __('app.stats.events.badge_expense');
                     $badgeClass = 'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-200 dark:border-emerald-800';
                 } elseif ($isEventRow && $typeVal === TruckOdometerEvent::TYPE_STEP) {
-                            $stepLabel = $stepStatusLabel($row->step_status ?? null);
-                            $typeLabel = $stepLabel
-                                ? __('app.stats.events.badge_step_prefix', ['status' => $stepLabel])
-                                : __('app.stats.events.badge_step');
+                    $stepLabel = $stepStatusLabel($row->step_status ?? null);
+                    $stepName = trim((string)($row->step_address ?? ''));
+                    if ($stepName !== '') {
+                        // Пример: "Rīga, LV, Noliktava 12 — Pabeigts"
+                        $suffix = $stepLabel ? ' — ' . $stepLabel : '';
+                        $typeLabel = $stepName . $suffix;
+                    } else {
+                        $typeLabel = $stepLabel
+                            ? __('app.stats.events.badge_step_prefix', ['status' => $stepLabel])
+                            : __('app.stats.events.badge_step');
+                    }
                     $badgeClass = 'bg-sky-50 text-sky-800 border-sky-200 dark:bg-sky-900/20 dark:text-sky-200 dark:border-sky-800';
                 } elseif ($isEventRow && $typeEnum) {
                     $typeLabel = $typeEnum->label();
@@ -389,9 +396,15 @@
                             $badgeClass = 'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-200 dark:border-emerald-800';
                         } elseif ($isEventRow && $typeVal === TruckOdometerEvent::TYPE_STEP) {
                     $stepLabel = $stepStatusLabel($row->step_status ?? null);
-                    $typeLabel = $stepLabel
-                        ? __('app.stats.events.badge_step_prefix', ['status' => $stepLabel])
-                        : __('app.stats.events.badge_step');
+                    $stepName = trim((string)($row->step_address ?? ''));
+                    if ($stepName !== '') {
+                        $suffix = $stepLabel ? ' — ' . $stepLabel : '';
+                        $typeLabel = $stepName . $suffix;
+                    } else {
+                        $typeLabel = $stepLabel
+                            ? __('app.stats.events.badge_step_prefix', ['status' => $stepLabel])
+                            : __('app.stats.events.badge_step');
+                    }
                             $badgeClass = 'bg-sky-50 text-sky-800 border-sky-200 dark:bg-sky-900/20 dark:text-sky-200 dark:border-sky-800';
                         } elseif ($isEventRow && $typeEnum) {
                             $typeLabel = $typeEnum->label();
