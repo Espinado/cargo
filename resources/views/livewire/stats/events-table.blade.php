@@ -38,10 +38,10 @@
 
 <div class="space-y-4">
 
-    {{-- Полноэкранный спиннер при экспорте PDF --}}
+    {{-- Полноэкранный спиннер при экспорте PDF (z выше глобального, чтобы не переключался на «Lūdzu, gaidiet») --}}
     <div wire:loading.flex
          wire:target="exportPdf"
-         class="fixed inset-0 z-[200] flex items-center justify-center bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm"
+         class="fixed inset-0 z-[260] flex items-center justify-center bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm"
          aria-live="polite"
          aria-label="{{ __('app.please_wait') }}">
         <div class="flex flex-col items-center gap-6 p-10 rounded-2xl bg-white dark:bg-gray-800 shadow-2xl border border-gray-200 dark:border-gray-700">
@@ -545,5 +545,20 @@
             {{ $rows->links() }}
         </div>
     </div>
+
+    {{-- После завершения запроса (в т.ч. exportPdf с файлом) принудительно скрываем глобальный оверлей — иначе «Lūdzu, gaidiet» зависает --}}
+    <script>
+        (function() {
+            if (typeof window.Livewire === 'undefined' || typeof window.Livewire.hook !== 'function') return;
+            window.Livewire.hook('request', function({ succeed, fail }) {
+                var hideGlobal = function() {
+                    var el = document.getElementById('global-navigate-overlay');
+                    if (el) el.classList.add('hidden');
+                };
+                succeed(hideGlobal);
+                fail(hideGlobal);
+            });
+        })();
+    </script>
 
 </div>
