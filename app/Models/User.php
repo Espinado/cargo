@@ -63,8 +63,9 @@ public function isAdmin(): bool
 }
 
     /**
-     * ID компаний, чьи машины пользователь видит на карте.
-     * Админ — все свои компании; менеджеры — только своя компания.
+     * ID компаний, чьи машины пользователь видит на карте и в Notikumi.
+     * Админ — компании из mapon.keys; если пусто — все компании (чтобы события не были пустыми).
+     * Менеджеры — только своя компания.
      *
      * @return array<int>
      */
@@ -72,7 +73,12 @@ public function isAdmin(): bool
     {
         if ($this->isAdmin()) {
             $keys = config('mapon.keys', []);
-            return array_values(array_map('intval', array_keys(array_filter($keys))));
+            $ids = array_values(array_map('intval', array_keys(array_filter($keys))));
+            if ($ids !== []) {
+                return $ids;
+            }
+            // Fallback: если ключи не настроены — показываем события по всем компаниям
+            return \App\Models\Company::query()->pluck('id')->map(fn ($id) => (int) $id)->values()->all();
         }
         $id = $this->company_id ?? null;
         return $id !== null ? [(int) $id] : [];

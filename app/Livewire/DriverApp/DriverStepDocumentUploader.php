@@ -9,7 +9,9 @@ use Illuminate\Validation\Rules\Enum;
 use App\Models\Trip;
 use App\Models\TripStep;
 use App\Models\TripStepDocument;
+use App\Models\TruckOdometerEvent;
 use App\Enums\StepDocumentType;
+use App\Enums\TripStepStatus;
 
 class DriverStepDocumentUploader extends Component
 {
@@ -69,6 +71,23 @@ class DriverStepDocumentUploader extends Component
                 'file_path'          => $path,
                 'comment'            => $this->comment,
             ]);
+
+            // Событие для раздела Notikumi: «документ по шагу загружен»
+            $trip = $this->trip->exists ? $this->trip->fresh(['driver', 'truck']) : $this->step->trip()->with(['driver', 'truck'])->first();
+            if ($trip && $trip->driver_id && $trip->truck_id) {
+                TruckOdometerEvent::create([
+                    'truck_id'      => $trip->truck_id,
+                    'driver_id'     => $trip->driver_id,
+                    'trip_id'       => $trip->id,
+                    'trip_step_id'  => $this->step->id,
+                    'type'          => TruckOdometerEvent::TYPE_STEP,
+                    'odometer_km'   => $this->step->odo_completed_km,
+                    'source'        => TruckOdometerEvent::SOURCE_MANUAL,
+                    'occurred_at'   => now(),
+                    'step_status'   => TripStepStatus::COMPLETED->value,
+                    'note'          => __('app.stats.events.note_document_uploaded'),
+                ]);
+            }
 
             $this->dispatch('driver-toast-document-uploaded');
             $this->dispatch('step-document-uploaded');

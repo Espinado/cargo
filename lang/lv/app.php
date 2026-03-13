@@ -58,6 +58,7 @@ return [
     'stats.events.badge_step'   => 'Soļa statuss',
     'stats.events.badge_step_prefix' => 'Solis: :status',
     'stats.events.badge_event'  => 'Notikums',
+    'stats.events.note_document_uploaded' => 'Dokuments augšupielādēts',
 
     // Sidebar / navigation
     'nav.dashboard'         => 'Panelis',
