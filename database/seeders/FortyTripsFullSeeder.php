@@ -40,7 +40,7 @@ class FortyTripsFullSeeder extends Seeder
     private const DOCS_PER_TRIP = 10;
     private const EXPENSES_PER_TRIP_MIN = 5;
     private const EXPENSES_PER_TRIP_MAX = 10;
-    private const TRIPS_WITH_FULL_LIFECYCLE = 20; // рейсы с выездом/заездом и закрытием
+    private const TRIPS_WITH_FULL_LIFECYCLE = 40; // рейсы с выездом/шагами/заездом (Notikumi)
     private const TRIPS_WITH_TIR = 15;
 
     public function run(): void

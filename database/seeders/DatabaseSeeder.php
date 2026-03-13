@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             CarrierTrailersSeeder::class,
             AdminUserSeeder::class,
             FortyTripsFullSeeder::class,
+            NotikumiEventsSeeder::class,
             FakeInvoicesSeeder::class,
         ]);
     }
