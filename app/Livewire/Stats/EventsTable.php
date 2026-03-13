@@ -12,6 +12,8 @@ use App\Models\TruckOdometerEvent;
 use App\Models\Driver;
 use App\Models\Truck;
 use App\Enums\TripExpenseCategory;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Response;
 
 class EventsTable extends Component
 {
@@ -356,6 +358,15 @@ class EventsTable extends Component
                 return $row;
             }
             $expense = $expensesById->get($row->id);
+            // Сумма, валюта и дата — всегда из модели (union иногда отдаёт 0)
+            if ($expense) {
+                $row->amount = $expense->amount;
+                $row->te_currency = $expense->currency ?? 'EUR';
+                $row->expense_date = $expense->expense_date?->format('Y-m-d');
+                $row->odometer_km = $expense->odometer_km;
+                $row->te_liters = $expense->liters;
+                $row->expense_category = $expense->category?->value;
+            }
             if ($expense?->category && $expense->category !== TripExpenseCategory::SUBCONTRACTOR) {
                 $row->expense_type_label = $expense->category->label();
                 $row->expense_is_fuel_like = in_array($expense->category, [
@@ -371,11 +382,192 @@ class EventsTable extends Component
         return $paginator;
     }
 
+    /**
+     * Сводка по расходам за выбранный период (те же фильтры: даты, водитель, грузовик).
+     * При фильтре по типу «только расходы» — сводка по расходам; иначе — по всем расходам за период.
+     */
+    public function getSummaryProperty(): array
+    {
+        $ownCompanyIds = $this->ownCompanyIds;
+        if ($ownCompanyIds === []) {
+            return [
+                'liters_items'  => [],
+                'by_category'   => [],
+                'total_amount'  => 0.0,
+                'total_liters'  => 0.0,
+                'period_label'  => $this->periodLabel(),
+            ];
+        }
+
+        // Если выбран тип «не расходы» — в таблице расходов нет, сводка пустая
+        if ($this->type !== null && (int) $this->type !== TruckOdometerEvent::TYPE_EXPENSE) {
+            return [
+                'liters_items'  => [],
+                'by_category'   => [],
+                'total_amount'  => 0.0,
+                'total_liters'  => 0.0,
+                'period_label'  => $this->periodLabel(),
+            ];
+        }
+
+        $q = DB::table('trip_expenses as te')
+            ->leftJoin('trips as t', 't.id', '=', 'te.trip_id')
+            ->leftJoin('trucks as tr', 'tr.id', '=', 't.truck_id')
+            ->whereNotNull('t.driver_id')
+            ->whereIn('tr.company_id', $ownCompanyIds)
+            ->where(function ($qq) {
+                $qq->whereNull('te.category')
+                    ->orWhere('te.category', '!=', TripExpenseCategory::SUBCONTRACTOR->value);
+            });
+
+        if ($this->dateFrom) {
+            $q->whereDate('te.expense_date', '>=', $this->dateFrom);
+        }
+        if ($this->dateTo) {
+            $q->whereDate('te.expense_date', '<=', $this->dateTo);
+        }
+        if (!empty($this->driverId)) {
+            $q->where('t.driver_id', (int) $this->driverId);
+        }
+        if (!empty($this->truckId)) {
+            $q->where('t.truck_id', (int) $this->truckId);
+        }
+
+        $litersCategories = [
+            TripExpenseCategory::FUEL->value,
+            TripExpenseCategory::ADBLUE->value,
+            TripExpenseCategory::WASHER_FLUID->value,
+        ];
+
+        $rows = $q->select('te.category')
+            ->selectRaw('COALESCE(SUM(te.amount), 0) as total_amount')
+            ->selectRaw('COALESCE(SUM(te.liters), 0) as total_liters')
+            ->groupBy('te.category')
+            ->get();
+
+        $litersItems = [];
+        $byCategory = [];
+        $totalAmount = 0.0;
+        $totalLiters = 0.0;
+
+        foreach ($rows as $r) {
+            $cat = $r->category;
+            $label = $cat ? (function () use ($cat) {
+                try {
+                    return TripExpenseCategory::from($cat)->label();
+                } catch (\Throwable $e) {
+                    return $cat;
+                }
+            })() : __('app.stats.events.badge_expense');
+            $amt = (float) $r->total_amount;
+            $lit = (float) $r->total_liters;
+            $totalAmount += $amt;
+            $totalLiters += $lit;
+
+            if ($cat && in_array($cat, $litersCategories, true)) {
+                $litersItems[$cat] = ['label' => $label, 'liters' => $lit];
+            } else {
+                $byCategory[] = [
+                    'label'  => $label,
+                    'amount' => $amt,
+                    'liters' => $lit,
+                ];
+            }
+        }
+
+        // Фиксированный порядок: Degviela, AdBlue, Logu mazgāšanas šķidrums
+        $litersOrdered = [];
+        foreach ($litersCategories as $key) {
+            $litersOrdered[] = $litersItems[$key] ?? [
+                'label' => TripExpenseCategory::from($key)->label(),
+                'liters' => 0.0,
+            ];
+        }
+
+        return [
+            'liters_items'  => $litersOrdered,
+            'by_category'   => $byCategory,
+            'total_amount'  => $totalAmount,
+            'total_liters'  => $totalLiters,
+            'period_label'  => $this->periodLabel(),
+        ];
+    }
+
+    protected function periodLabel(): string
+    {
+        if ($this->dateFrom && $this->dateTo) {
+            return $this->dateFrom . ' — ' . $this->dateTo;
+        }
+        if ($this->dateFrom) {
+            return __('app.stats.events.summary_from') . ' ' . $this->dateFrom;
+        }
+        if ($this->dateTo) {
+            return __('app.stats.events.summary_to') . ' ' . $this->dateTo;
+        }
+        return __('app.stats.events.summary_period_all');
+    }
+
+    /**
+     * Экспорт текущей выборки (с учётом фильтров) в PDF.
+     */
+    public function exportPdf()
+    {
+        $query = $this->query();
+        $allRows = $query->get();
+
+        $expenseIds = $allRows->filter(fn ($row) => ($row->row_kind ?? '') === 'expense')->pluck('id')->filter()->unique()->values()->all();
+        $expensesById = $expenseIds !== []
+            ? TripExpense::whereIn('id', $expenseIds)->get()->keyBy('id')
+            : collect();
+
+        $rows = $allRows->map(function ($row) use ($expensesById) {
+            $obj = (object) (array) $row;
+            if (($row->row_kind ?? '') === 'expense') {
+                $expense = $expensesById->get($row->id);
+                if ($expense) {
+                    $obj->amount = $expense->amount;
+                    $obj->te_currency = $expense->currency ?? 'EUR';
+                    $obj->expense_date = $expense->expense_date?->format('Y-m-d');
+                    $obj->odometer_km = $expense->odometer_km;
+                    $obj->te_liters = $expense->liters;
+                    $obj->expense_category = $expense->category?->value;
+                    if ($expense->category && $expense->category !== TripExpenseCategory::SUBCONTRACTOR) {
+                        $obj->expense_type_label = $expense->category->label();
+                    } else {
+                        $obj->expense_type_label = __('app.stats.events.badge_expense');
+                    }
+                }
+            }
+            return $obj;
+        });
+
+        $summary = $this->summary;
+
+        $html = view('pdf.stats-events', [
+            'rows'    => $rows,
+            'summary' => $summary,
+            'title'   => __('app.stats.events.title'),
+        ])->render();
+
+        $pdf = Pdf::loadHTML($html);
+        $pdf->setPaper('A4', 'landscape');
+
+        $filename = 'notikumi-' . ($this->dateFrom ?: '') . ($this->dateTo ? '-' . $this->dateTo : '') . '.pdf';
+        $filename = preg_replace('/^--/', '', $filename) ?: 'notikumi.pdf';
+
+        return Response::streamDownload(function () use ($pdf) {
+            echo $pdf->output();
+        }, $filename, [
+            'Content-Type' => 'application/pdf',
+        ]);
+    }
+
     public function render()
     {
         return view('livewire.stats.events-table', [
-            'rows'  => $this->rows,
-            'types' => $this->typeOptions,
+            'rows'    => $this->rows,
+            'types'   => $this->typeOptions,
+            'summary' => $this->summary,
         ])->layout('layouts.app', [
             'title' => __('app.stats.events.title'),
         ]);

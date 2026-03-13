@@ -38,6 +38,21 @@
 
 <div class="space-y-4">
 
+    {{-- Полноэкранный спиннер при экспорте PDF --}}
+    <div wire:loading.flex
+         wire:target="exportPdf"
+         class="fixed inset-0 z-[200] flex items-center justify-center bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm"
+         aria-live="polite"
+         aria-label="{{ __('app.please_wait') }}">
+        <div class="flex flex-col items-center gap-6 p-10 rounded-2xl bg-white dark:bg-gray-800 shadow-2xl border border-gray-200 dark:border-gray-700">
+            <svg class="animate-spin h-20 w-20 text-sky-600 dark:text-sky-400 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span class="font-semibold text-gray-800 dark:text-gray-200 text-xl">{{ __('app.stats.events.generating_pdf') }}</span>
+        </div>
+    </div>
+
     {{-- Header --}}
     <div class="flex items-center justify-between gap-3">
         <div>
@@ -131,6 +146,51 @@
                     {{ __('app.stats.events.clear') }}
                 </button>
             </div>
+        </div>
+    </div>
+
+    {{-- Сводка по расходам за период + кнопка экспорта PDF --}}
+    <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 p-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <h2 class="text-sm font-bold text-gray-700 dark:text-gray-300">
+                {{ __('app.stats.events.summary_title') }}
+                @if($summary['period_label'] ?? '')
+                    <span class="font-normal text-gray-500 dark:text-gray-400">({{ $summary['period_label'] }})</span>
+                @endif
+            </h2>
+            <button type="button"
+                    wire:click="exportPdf"
+                    wire:loading.attr="disabled"
+                    wire:target="exportPdf"
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold shadow-sm disabled:opacity-70 disabled:cursor-not-allowed">
+                📄 {{ __('app.stats.events.export_pdf') }}
+            </button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+            <div class="rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 p-4">
+                <div class="text-xs font-semibold text-emerald-700 dark:text-emerald-300 uppercase tracking-wide">{{ __('app.stats.events.summary_total') }}</div>
+                <div class="mt-1 text-2xl font-bold text-emerald-900 dark:text-emerald-100">
+                    EUR {{ number_format((float)($summary['total_amount'] ?? 0), 2, ',', ' ') }}
+                </div>
+            </div>
+            @if(count($summary['by_category'] ?? []) > 0)
+                <div class="rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 p-4">
+                    <div class="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2">{{ __('app.stats.events.col_event') }} / {{ __('app.stats.events.col_amount') }}</div>
+                    <ul class="space-y-1.5 text-sm">
+                        @foreach($summary['by_category'] as $item)
+                            <li class="flex justify-between gap-2">
+                                <span class="text-gray-700 dark:text-gray-300">{{ $item['label'] }}</span>
+                                <span class="font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                                    EUR {{ number_format((float)$item['amount'], 2, ',', ' ') }}
+                                    @if((float)$item['liters'] > 0)
+                                        <span class="text-gray-500 dark:text-gray-400 font-normal">/ {{ number_format((float)$item['liters'], 2, ',', ' ') }} L</span>
+                                    @endif
+                                </span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
         </div>
     </div>
 
@@ -242,7 +302,6 @@
                             <div class="font-semibold text-gray-900 dark:text-gray-100 truncate">👨‍✈️ {{ $driver }}</div>
                             <div class="text-sm text-gray-600 dark:text-gray-300 truncate">🚛 {{ $truck }}</div>
                         </div>
-
                         <span class="shrink-0 inline-flex items-center px-2 py-1 rounded-lg border text-xs font-semibold {{ $badgeClass }}">
                             {{ $typeLabel }}
                         </span>
@@ -402,7 +461,6 @@
 
                 if ($isExpenseRow) {
                     $typeLabel = $row->expense_type_label ?? __('app.stats.events.badge_expense');
-                    // Литры в бейдже; одометр только в колонке «Odometrs»
                     if ($fuelLike && $liters !== null) {
                         $typeLabel .= ' • ' . number_format((float)$liters, 2, ',', ' ') . ' L';
                     }
@@ -439,8 +497,6 @@
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap">{{ $ts }}</td>
                             <td class="px-4 py-3 text-right whitespace-nowrap">{{ $odo }}</td>
-
-                            {{-- Amount --}}
                             <td class="px-4 py-3 text-right whitespace-nowrap">
                                 @if($isExpenseRow && $amount !== null)
                                     {{ $currency }} {{ number_format((float)$amount, 2, ',', ' ') }}
@@ -448,8 +504,6 @@
                                     —
                                 @endif
                             </td>
-
-                            {{-- Details --}}
                             <td class="px-4 py-3">
                                 @if($isExpenseRow)
                                     <div class="space-y-1">

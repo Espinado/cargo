@@ -47,6 +47,14 @@ return [
     'stats.events.view_trip'      => 'Открыть рейс',
     'stats.events.no_expenses'    => 'Нет расходов',
     'stats.events.no_steps'       => 'Нет событий по шагам',
+    'stats.events.summary_title'  => 'Сводка расходов за период',
+    'stats.events.summary_period_all' => 'Весь период',
+    'stats.events.summary_from'   => 'С',
+    'stats.events.summary_to'     => 'По',
+    'stats.events.summary_total'  => 'Всего расходы',
+    'stats.events.summary_liters'=> 'Всего литров',
+    'stats.events.export_pdf'    => 'Экспорт в PDF',
+    'stats.events.generating_pdf'=> 'Генерация PDF...',
 
     // Trip show (toasts)
     'trip.show.toast_deleted' => 'Удалено',

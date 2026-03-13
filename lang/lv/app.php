@@ -67,6 +67,14 @@ return [
     'stats.events.view_trip'       => 'Atvērt reisu',
     'stats.events.no_expenses'     => 'Nav izdevumu',
     'stats.events.no_steps'       => 'Nav soļu notikumu',
+    'stats.events.summary_title'  => 'Izdevumu kopsavilkums par periodu',
+    'stats.events.summary_period_all' => 'Viss periods',
+    'stats.events.summary_from'   => 'No',
+    'stats.events.summary_to'    => 'Līdz',
+    'stats.events.summary_total' => 'Kopā izdevumi',
+    'stats.events.summary_liters'=> 'Kopā litri',
+    'stats.events.export_pdf'    => 'Eksportēt PDF',
+    'stats.events.generating_pdf'=> 'Ģenerē PDF...',
 
     // Sidebar / navigation
     'nav.dashboard'         => 'Panelis',
