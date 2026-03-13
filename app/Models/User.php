@@ -61,4 +61,20 @@ public function isAdmin(): bool
 {
     return ($this->role ?? null) === 'admin';
 }
+
+    /**
+     * ID компаний, чьи машины пользователь видит на карте.
+     * Админ — все свои компании; менеджеры — только своя компания.
+     *
+     * @return array<int>
+     */
+    public function allowedMapCompanyIds(): array
+    {
+        if ($this->isAdmin()) {
+            $keys = config('mapon.keys', []);
+            return array_values(array_map('intval', array_keys(array_filter($keys))));
+        }
+        $id = $this->company_id ?? null;
+        return $id !== null ? [(int) $id] : [];
+    }
 }

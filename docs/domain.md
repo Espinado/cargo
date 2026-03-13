@@ -7,7 +7,7 @@
   - Важные поля: `type` (`carrier`, `forwarder`, `mixed`, `expeditor`), `is_third_party`, `is_active`.
   - **Expeditor snapshot** пишется прямо в `trips.*` (имя, рег. номер, контакты, банковские реквизиты).
 - **Мульти‑компания**
-  - Один и тот же код работает для Lakna / Padex / Expeditor.
+  - Один и тот же код работает для нескольких компаний (carrier/expeditor).
   - В `Trip::booted()` есть global scope, который ограничивает видимость рейсов по:
     - роли пользователя (`admin` видит всё),
     - `driver_id` (для водителей),

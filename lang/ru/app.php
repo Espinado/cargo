@@ -223,5 +223,8 @@ return [
     'enums.odometer_event_type.step_completed' => 'Шаг завершён',
     'enums.odometer_event_type.run_end'        => 'Возврат в гараж',
     'enums.odometer_event_type.manual'         => 'Введено вручную',
+
+    'trip.validation.err_driver_overlap' => 'Выбранный водитель уже назначен на другой рейс в этот период. Один рейс = один водитель.',
+    'trip.validation.err_truck_overlap'   => 'Выбранная машина уже назначена на другой рейс в этот период. Один рейс = одна машина.',
 ];
 

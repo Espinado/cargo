@@ -687,6 +687,9 @@ return [
     'trip.edit.err_save'           => 'Kļūda, saglabājot reisu.',
     'trip.edit.expense_third'      => 'Maksa 3. pusei: :name',
 
+    'trip.validation.err_driver_overlap' => 'Izvēlētais vadītājs jau ir piešķirts citam reisam šajā periodā. Viens reiss = viens vadītājs.',
+    'trip.validation.err_truck_overlap'   => 'Izvēlētais kravas auto jau ir piešķirts citam reisam šajā periodā. Viens reiss = viens kravas auto.',
+
     // Expiring documents (dashboard)
     'exp.search'            => 'Meklēt dokumentu...',
     'exp.sort'              => 'Kārtot',

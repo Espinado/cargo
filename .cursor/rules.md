@@ -28,9 +28,7 @@ Stack:
 - MySQL
 
 Система multi-company:
-- Lakna
-- Padex
-- Expeditor (посредник)
+- Carrier / Expeditor (посредник)
 
 Есть 2 зоны:
 - Admin (guard: web)

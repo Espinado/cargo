@@ -4,6 +4,7 @@ namespace App\Livewire\Stats;
 
 use Livewire\Component;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 use App\Models\TripExpense;
@@ -23,7 +24,8 @@ class EventsTable extends Component
     public ?int $truckId = null;
     public ?string $dateFrom = null;
     public ?string $dateTo = null;
-    public array $ownCompanyIds = [1, 2];
+    /** @var array<int> ID компаний, по которым показывать события (из текущего пользователя) */
+    public array $ownCompanyIds = [];
 
     // Table: по умолчанию по дате, последние сначала (как в /trips)
     public string $sortField = 'timestamp';
@@ -51,6 +53,9 @@ class EventsTable extends Component
 
     public function mount(): void
     {
+        $user = Auth::user();
+        $this->ownCompanyIds = $user ? $user->allowedMapCompanyIds() : [];
+
         $this->drivers = Driver::query()
             ->select(['id', 'first_name', 'last_name'])
             ->orderBy('first_name')

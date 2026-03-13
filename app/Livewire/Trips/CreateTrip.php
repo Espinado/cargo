@@ -136,7 +136,7 @@ class CreateTrip extends Component
 
         $this->payers = config('payers', []);
 
-        // internal carriers (Lakna/Padex etc) — exclude third parties
+        // internal carriers — exclude third parties
         $this->carrierCompanies = Company::query()
             ->where('is_active', 1)
             ->where(function ($q) {
@@ -1069,6 +1069,16 @@ class CreateTrip extends Component
                             'В позиции #' . ($itemIndex + 1) . ' необходимо указать хотя бы одно поле (описание, код ТН ВЭД или единицы измерения).'
                         );
                     }
+                }
+            }
+
+            // Один рейс = одна машина = один водитель. Не допускаем пересечение дат.
+            if (!$isThirdPartyFlow && $this->start_date) {
+                if ($this->driver_id && Trip::hasOverlappingDriver((int) $this->driver_id, $this->start_date, $this->end_date, null)) {
+                    $validator->errors()->add('driver_id', __('app.trip.validation.err_driver_overlap'));
+                }
+                if ($this->truck_id && Trip::hasOverlappingTruck((int) $this->truck_id, $this->start_date, $this->end_date, null)) {
+                    $validator->errors()->add('truck_id', __('app.trip.validation.err_truck_overlap'));
                 }
             }
         });

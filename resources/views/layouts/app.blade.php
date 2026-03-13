@@ -226,6 +226,25 @@
         overlay?.addEventListener('click', closeSidebarMenu);
     </script>
 
+    {{-- При 419 (Page expired) редирект на логин — перехват до загрузки Livewire --}}
+    <script>
+    (function() {
+        window.__loginRedirectUrl = @json(route('login'));
+        var f = window.fetch;
+        if (typeof f !== 'function') return;
+        window.fetch = function() {
+            return f.apply(this, arguments).then(function(r) {
+                if (r.status === 419) {
+                    var url = r.headers.get('X-Redirect-To') || window.__loginRedirectUrl || '/login';
+                    window.location.href = url;
+                    return Promise.reject(new Error('Session expired'));
+                }
+                return r;
+            });
+        };
+    })();
+    </script>
+
     {{-- Livewire scripts --}}
     @livewireScripts
 

@@ -22,10 +22,9 @@ return [
     // 🔙 старый вариант (НЕ УДАЛЯЕМ)
     'key' => env('MAPON_API_KEY', ''),
 
-    // ✅ новый вариант: ключи по компаниям
+    // ✅ ключи по компаниям (company_id => API key)
     'keys' => [
-        1 => env('MAPON_API_KEY_LAKNA', ''),
-        2 => env('MAPON_API_KEY_PADEKS', ''),
+        1 => env('MAPON_API_KEY', ''),
     ],
 
     /*

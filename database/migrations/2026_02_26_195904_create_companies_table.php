@@ -11,7 +11,7 @@ return new class extends Migration {
             $table->engine = 'InnoDB';
             $table->id();
 
-            $table->string('slug')->unique(); // lakna/padex/expeditor
+            $table->string('slug')->unique();
             $table->string('name');
 
             $table->string('type')->default('carrier')->index(); // carrier|forwarder|mixed

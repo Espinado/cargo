@@ -27,7 +27,7 @@
     - `Invoice`, `InvoicePayment`.
     - `DriverEvent` — отдельные события по водителю (напоминания/штрафы и т.п.).
   - Компании и клиенты:
-    - `Company` — юр. лица (Lakna/Padex/expeditor/third party).
+    - `Company` — юр. лица (carrier/expeditor/third party).
     - `Client` — клиенты для грузов/фрахтов.
   - Пользователи:
     - `User` — учётные записи админки.

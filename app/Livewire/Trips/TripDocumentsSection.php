@@ -44,7 +44,7 @@ class TripDocumentsSection extends Component
 
         $path = ImageCompress::storeUpload($this->documentFile, "trip_documents/trip_{$this->trip->id}", 'public');
 
-        TripDocument::create([
+        $doc = TripDocument::create([
             'trip_id'     => $this->trip->id,
             'type'        => $this->type,
             'name'        => $this->name,
@@ -55,11 +55,13 @@ class TripDocumentsSection extends Component
 
         $this->reset(['name', 'documentFile']);
         session()->flash('success', '📄 Dokuments veiksmīgi augšupielādēts.');
+        $this->dispatch('document-added', id: $doc->id);
     }
 
     public function delete($id)
     {
         $doc = TripDocument::findOrFail($id);
+        abort_if((int) $doc->trip_id !== (int) $this->trip->id, 403);
 
         Storage::disk('public')->delete($doc->file_path);
         $doc->delete();
@@ -95,11 +97,12 @@ class TripDocumentsSection extends Component
 
         foreach ($tripDocs as $doc) {
             $list->push((object)[
-                'type_label'   => $doc->type?->label() ?? '—',
-                'name'         => $doc->name ?? '—',
-                'uploaded_at'  => $doc->uploaded_at,
-                'file_url'     => $doc->file_url ?? asset('storage/' . $doc->file_path),
-                'step_label'   => null,
+                'id'          => (string) $doc->id,
+                'type_label'  => $doc->type?->label() ?? '—',
+                'name'        => $doc->name ?? '—',
+                'uploaded_at' => $doc->uploaded_at,
+                'file_url'    => $doc->file_url ?? asset('storage/' . $doc->file_path),
+                'step_label'  => null,
             ]);
         }
 
@@ -110,11 +113,12 @@ class TripDocumentsSection extends Component
                 : ('Solis #' . $doc->trip_step_id);
 
             $list->push((object)[
-                'type_label'   => $doc->type?->label() ?? '—',
-                'name'         => trim($doc->comment ?? $doc->original_name ?? '') ?: '—',
-                'uploaded_at'  => $doc->created_at,
-                'file_url'     => asset('storage/' . $doc->file_path),
-                'step_label'   => $stepLabel,
+                'id'          => 'step-' . $doc->id,
+                'type_label'  => $doc->type?->label() ?? '—',
+                'name'        => trim($doc->comment ?? $doc->original_name ?? '') ?: '—',
+                'uploaded_at' => $doc->created_at,
+                'file_url'    => asset('storage/' . $doc->file_path),
+                'step_label'  => $stepLabel,
             ]);
         }
 

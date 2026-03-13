@@ -10,10 +10,12 @@ class FillRemainingTripsCarrierCompanySeeder extends Seeder
 {
     public function run(): void
     {
-        $lakna = Company::where('slug', 'lakna')->first();
-        if (!$lakna) return;
+        $carrier = Company::orderBy('id')->first();
+        if (!$carrier) {
+            return;
+        }
 
         Trip::whereNull('carrier_company_id')
-            ->update(['carrier_company_id' => $lakna->id]);
+            ->update(['carrier_company_id' => $carrier->id]);
     }
 }

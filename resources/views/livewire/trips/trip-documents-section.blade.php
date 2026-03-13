@@ -186,7 +186,7 @@
                     $isPdf = $ext === 'pdf';
                 @endphp
 
-                <div class="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+                <div id="document-{{ $doc->id ?? '' }}" class="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
                     <div class="p-4 flex items-start gap-3">
 
                         {{-- preview/icon --}}
@@ -284,7 +284,7 @@
                             $isPdf = $ext === 'pdf';
                         @endphp
 
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/70 transition">
+                        <tr id="document-{{ $doc->id ?? '' }}" class="hover:bg-gray-50 dark:hover:bg-gray-800/70 transition">
                             <td class="px-3 py-2">{{ $doc->type_label ?? '—' }}</td>
                             <td class="px-3 py-2">{{ $doc->name ?? '—' }}</td>
                             <td class="px-3 py-2 text-gray-600 dark:text-gray-400">
@@ -348,4 +348,16 @@
         </button>
     </div>
 
+    <script>
+        document.addEventListener('livewire:init', function () {
+            Livewire.on('document-added', function (id) {
+                var docId = (typeof id === 'object' && id !== null && 'id' in id) ? id.id : id;
+                if (docId == null) return;
+                setTimeout(function () {
+                    var el = document.getElementById('document-' + docId);
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 150);
+            });
+        });
+    </script>
 </div>

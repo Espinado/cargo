@@ -31,22 +31,21 @@ use App\Notifications\TestPushNotification;
 
 // Главная страница
 Route::redirect('/', '/dashboard');
-Route::get('/_dev/find-odometer', function () {
-    $root = app_path();
-
-    $rii = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS)
-    );
-
-    $matches = [];
-    foreach ($rii as $file) {
-        if ($file->getFilename() === 'MaponOdometerFetcher.php') {
-            $matches[] = $file->getPathname();
+if (app()->environment('local')) {
+    Route::get('/_dev/find-odometer', function () {
+        $root = app_path();
+        $rii = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS)
+        );
+        $matches = [];
+        foreach ($rii as $file) {
+            if ($file->getFilename() === 'MaponOdometerFetcher.php') {
+                $matches[] = $file->getPathname();
+            }
         }
-    }
-
-    return $matches;
-});
+        return $matches;
+    });
+}
 
 // === БЛОК АДМИНА (auth + verified) ===
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -74,6 +73,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('push.subscribe');
 
     Route::get('/dashboard', ExpiringDocumentsTable::class)->name('dashboard');
+
+    // Прокси тайлов OSM — до /map, чтобы не перехватывалось Livewire. OSM требует User-Agent.
+    Route::get('/map/tiles/{z}/{x}/{y}.png', function (int $z, int $x, int $y) {
+        $z = max(0, min(19, $z));
+        $url = 'https://a.tile.openstreetmap.org/' . $z . '/' . $x . '/' . $y . '.png';
+        $response = \Illuminate\Support\Facades\Http::timeout(8)
+            ->withHeaders([
+                'User-Agent' => config('app.name', 'CargoTrans') . '/1.0 (+' . config('app.url', '') . ')',
+            ])
+            ->get($url);
+        if (!$response->successful()) {
+            abort(404);
+        }
+        return response($response->body(), 200, [
+            'Content-Type'  => 'image/png',
+            'Cache-Control' => 'public, max-age=86400',
+        ]);
+    })->whereNumber(['z', 'x', 'y'])->name('map.tiles');
 
     // Drivers
     Route::get('/drivers', DriversTable::class)->name('drivers.index');
@@ -123,6 +140,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/invoices', InvoicesTable::class)
     ->name('invoices.index');
   Route::get('/invoices/{invoice}/open', function (Invoice $invoice) {
+    $invoice->load('trip');
+    $user = auth()->user();
+    if ($user && !$user->isAdmin() && $user->company_id !== null) {
+        abort_if(!$invoice->trip || (int) $invoice->trip->carrier_company_id !== (int) $user->company_id, 403);
+    }
 
     if (!$invoice->pdf_file) {
         abort(404, 'Invoice PDF not found');

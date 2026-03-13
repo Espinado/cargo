@@ -110,7 +110,7 @@ public function loadMaponData(): void
             : ($this->maponLastUpdate ? (string) $this->maponLastUpdate : null);
 
     } else {
-        // ✅ CAN нет (Lakna) → используем mileage
+        // ✅ CAN нет → используем mileage
         $rawMileage = data_get($result, 'mileage');
 
         if ($rawMileage === null || $rawMileage === '') {
