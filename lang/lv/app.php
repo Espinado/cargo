@@ -60,6 +60,13 @@ return [
     'stats.events.badge_event'  => 'Notikums',
     'stats.events.note_document_uploaded' => 'Dokuments augšupielādēts',
     'stats.events.hint_expenses' => 'Degvielai un AdBlue tiek rādīti litri un odometrs; citi vadītāja izdevumi – bez odometra.',
+    'stats.events.summary_by_trip' => 'Pārskats pa reisiem',
+    'stats.events.trip_expenses'   => 'Izdevumi par reisu',
+    'stats.events.step_changes'   => 'Soļu izmaiņas',
+    'stats.events.total_trip'     => 'Kopā',
+    'stats.events.view_trip'       => 'Atvērt reisu',
+    'stats.events.no_expenses'     => 'Nav izdevumu',
+    'stats.events.no_steps'       => 'Nav soļu notikumu',
 
     // Sidebar / navigation
     'nav.dashboard'         => 'Panelis',

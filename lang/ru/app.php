@@ -40,6 +40,13 @@ return [
 
     // Stats / Driver events
     'stats.events.hint_expenses' => 'Для расходов топлива и AdBlue показываем литры и одометр; для остальных расходов одометр не отображается.',
+    'stats.events.summary_by_trip' => 'Сводка по рейсам',
+    'stats.events.trip_expenses'   => 'Расходы по рейсу',
+    'stats.events.step_changes'   => 'Изменения шагов',
+    'stats.events.total_trip'     => 'Итого',
+    'stats.events.view_trip'      => 'Открыть рейс',
+    'stats.events.no_expenses'    => 'Нет расходов',
+    'stats.events.no_steps'       => 'Нет событий по шагам',
 
     // Trip show (toasts)
     'trip.show.toast_deleted' => 'Удалено',

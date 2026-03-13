@@ -187,28 +187,31 @@
 
                 $liters = $isExpenseRow ? ($row->te_liters ?? null) : null;
                 $odoExpense = $isExpenseRow ? ($row->odometer_km ?? null) : null;
-                $fuelLike = $isExpenseRow ? $isFuelLike($cat) : false;
+                // Используем флаг из компонента (по модели), иначе — по категории из строки
+                $fuelLike = $isExpenseRow ? ($row->expense_is_fuel_like ?? $isFuelLike($cat)) : false;
 
-                // Для driver expenses одометр в "шапке" показываем только для Degviela / AdBlue
+                // Для driver expenses одометр в колонке показываем только для Degviela / AdBlue
                 if ($isExpenseRow && !$fuelLike) {
                     $odoMainValue = null;
                     $odoExpense = null;
+                }
+                if ($isExpenseRow && $fuelLike && ($row->odometer_km ?? null) !== null) {
+                    $odoMainValue = (float) $row->odometer_km;
                 }
 
                 $odoMain = $odoMainValue !== null
                     ? number_format((float)$odoMainValue, 1, ',', ' ') . ' km'
                     : null;
 
-                // Тип/бейдж:
-                // - row_kind=expense  -> Driver expenses (зелёный)
-                // - row_kind=event + TYPE_STEP      -> Step + статус шага (голубой)
-                // - row_kind=event + RUN_START/END  -> OdometerEventType (amber/violet)
-                // - остальное                       -> Event (серый)
+                // Тип/бейдж: для расходов используем подпись из компонента (Degviela, Sods, Stāvvieta…)
                 $typeLabel = null;
                 $badgeClass = null;
 
                 if ($isExpenseRow) {
-                    $typeLabel = __('app.stats.events.badge_expense');
+                    $typeLabel = $row->expense_type_label ?? __('app.stats.events.badge_expense');
+                    if ($fuelLike && $liters !== null) {
+                        $typeLabel .= ' • ' . number_format((float)$liters, 2, ',', ' ') . ' L';
+                    }
                     $badgeClass = 'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-200 dark:border-emerald-800';
                 } elseif ($isEventRow && $typeVal === TruckOdometerEvent::TYPE_STEP) {
                     $stepLabel = $stepStatusLabel($row->step_status ?? null);
@@ -255,7 +258,7 @@
                     @if($isExpenseRow)
                         <div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/40 p-3 space-y-1">
                             <div class="font-semibold text-gray-900 dark:text-gray-100">
-                                {{ $catLabel ?? ($cat ?? '—') }}
+                                {{ $row->expense_type_label ?? __('app.stats.events.badge_expense') }}
                             </div>
 
                             <div class="text-sm text-gray-800 dark:text-gray-200">
@@ -379,12 +382,15 @@
 
                         $liters = $isExpenseRow ? ($row->te_liters ?? null) : null;
                         $odoExpense = $isExpenseRow ? ($row->odometer_km ?? null) : null;
-                        $fuelLike = $isExpenseRow ? $isFuelLike($cat) : false;
+                        $fuelLike = $isExpenseRow ? ($row->expense_is_fuel_like ?? $isFuelLike($cat)) : false;
 
-                        // Для driver expenses одометр в колонке Odo показываем только для Degviela / AdBlue
+                        // Для driver expenses одометр в колонке «Odometrs» показываем только для Degviela / AdBlue
                         if ($isExpenseRow && !$fuelLike) {
                             $odoMainValue = null;
                             $odoExpense = null;
+                        }
+                        if ($isExpenseRow && $fuelLike && ($row->odometer_km ?? null) !== null) {
+                            $odoMainValue = (float) $row->odometer_km;
                         }
 
                         $odo = $odoMainValue !== null
@@ -395,7 +401,11 @@
                         $badgeClass = null;
 
                 if ($isExpenseRow) {
-                    $typeLabel = __('app.stats.events.badge_expense');
+                    $typeLabel = $row->expense_type_label ?? __('app.stats.events.badge_expense');
+                    // Литры в бейдже; одометр только в колонке «Odometrs»
+                    if ($fuelLike && $liters !== null) {
+                        $typeLabel .= ' • ' . number_format((float)$liters, 2, ',', ' ') . ' L';
+                    }
                             $badgeClass = 'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-200 dark:border-emerald-800';
                         } elseif ($isEventRow && $typeVal === TruckOdometerEvent::TYPE_STEP) {
                     $stepLabel = $stepStatusLabel($row->step_status ?? null);
@@ -444,7 +454,7 @@
                                 @if($isExpenseRow)
                                     <div class="space-y-1">
                                         <div class="font-semibold text-gray-900 dark:text-gray-100">
-                                            {{ $catLabel ?? ($cat ?? '—') }}
+                                            {{ $row->expense_type_label ?? __('app.stats.events.badge_expense') }}
                                         </div>
 
                                         @if($fuelLike)

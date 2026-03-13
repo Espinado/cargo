@@ -19,7 +19,8 @@ class EventsTable extends Component
 
     // Filters
     public string $search = '';
-    public ?int $type = null;
+    /** @var int|null Приходит из query/select как string — нормализуем в mount/updatedType */
+    public $type = null;
     public ?int $driverId = null;
     public ?int $truckId = null;
     public ?string $dateFrom = null;
@@ -51,10 +52,20 @@ class EventsTable extends Component
         'perPage' => ['except' => 25],
     ];
 
+    public function updatedType($value): void
+    {
+        $this->type = $value !== null && $value !== '' ? (int) $value : null;
+    }
+
     public function mount(): void
     {
         $user = Auth::user();
         $this->ownCompanyIds = $user ? $user->allowedMapCompanyIds() : [];
+        if ($this->type !== null && $this->type !== '') {
+            $this->type = (int) $this->type;
+        } elseif ($this->type === '') {
+            $this->type = null;
+        }
 
         $this->drivers = Driver::query()
             ->select(['id', 'first_name', 'last_name'])
@@ -328,7 +339,36 @@ class EventsTable extends Component
     }
     public function getRowsProperty()
     {
-        return $this->query()->paginate($this->perPage);
+        $paginator = $this->query()->paginate($this->perPage);
+        $expenseIds = $paginator->getCollection()
+            ->filter(fn ($row) => ($row->row_kind ?? '') === 'expense')
+            ->pluck('id')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+        $expensesById = $expenseIds !== []
+            ? TripExpense::whereIn('id', $expenseIds)->get()->keyBy('id')
+            : collect();
+
+        $paginator->getCollection()->transform(function ($row) use ($expensesById) {
+            if (($row->row_kind ?? '') !== 'expense') {
+                return $row;
+            }
+            $expense = $expensesById->get($row->id);
+            if ($expense?->category && $expense->category !== TripExpenseCategory::SUBCONTRACTOR) {
+                $row->expense_type_label = $expense->category->label();
+                $row->expense_is_fuel_like = in_array($expense->category, [
+                    TripExpenseCategory::FUEL,
+                    TripExpenseCategory::ADBLUE,
+                ], true);
+            } else {
+                $row->expense_type_label = __('app.stats.events.badge_expense');
+                $row->expense_is_fuel_like = false;
+            }
+            return $row;
+        });
+        return $paginator;
     }
 
     public function render()
