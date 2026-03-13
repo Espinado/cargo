@@ -43,6 +43,9 @@
         <div>
             <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">🧾 {{ __('app.stats.events.title') }}</h1>
             <div class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.stats.events.subtitle') }}</div>
+            <div class="mt-1 text-xs text-gray-500 dark:text-gray-400 max-w-2xl">
+                {{ __('app.stats.events.hint_expenses') }}
+            </div>
         </div>
 
         <button

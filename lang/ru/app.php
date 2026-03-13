@@ -38,6 +38,9 @@ return [
     'driver.toast.error'   => 'Ошибка! Свяжитесь с администратором.',
     'driver.toast.document_uploaded' => 'Документ загружен',
 
+    // Stats / Driver events
+    'stats.events.hint_expenses' => 'Для расходов топлива и AdBlue показываем литры и одометр; для остальных расходов одометр не отображается.',
+
     // Trip show (toasts)
     'trip.show.toast_deleted' => 'Удалено',
     'trip.show.toast_error'   => 'Ошибка!',

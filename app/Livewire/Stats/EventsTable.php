@@ -174,7 +174,9 @@ class EventsTable extends Component
                 'tr.plate as tr_plate',
             ])
             ->whereNotNull('toe.driver_id')
-            ->whereIn('d.company_id', $ownCompanyIds)
+            // Фильтрация по компании грузовика, а не водителя:
+            // mapon.keys привязаны к trucks.company_id
+            ->whereIn('tr.company_id', $ownCompanyIds)
             // В этом списке не хотим TYPE_EXPENSE — расходы отдельными строками
             ->where('toe.type', '!=', TruckOdometerEvent::TYPE_EXPENSE);
 
@@ -222,7 +224,8 @@ class EventsTable extends Component
                 'tr.plate as tr_plate',
             ])
             ->whereNotNull('t.driver_id')
-            ->whereIn('d.company_id', $ownCompanyIds)
+            // Аналогично событиям: фильтруем по компании грузовика
+            ->whereIn('tr.company_id', $ownCompanyIds)
             // Исключаем subcontractor-расходы
             ->where(function ($qq) {
                 $qq->whereNull('te.category')

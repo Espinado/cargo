@@ -59,6 +59,7 @@ return [
     'stats.events.badge_step_prefix' => 'Solis: :status',
     'stats.events.badge_event'  => 'Notikums',
     'stats.events.note_document_uploaded' => 'Dokuments augšupielādēts',
+    'stats.events.hint_expenses' => 'Degvielai un AdBlue tiek rādīti litri un odometrs; citi vadītāja izdevumi – bez odometra.',
 
     // Sidebar / navigation
     'nav.dashboard'         => 'Panelis',
