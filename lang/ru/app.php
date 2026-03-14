@@ -38,6 +38,31 @@ return [
     'driver.toast.error'   => 'Ошибка! Свяжитесь с администратором.',
     'driver.toast.document_uploaded' => 'Документ загружен',
 
+    // Stats general
+    'stats.date_from'          => 'Дата с',
+    'stats.date_to'            => 'Дата по',
+    // Stats / By clients
+    'stats.clients.title'         => 'Статистика по клиентам',
+    'stats.clients.subtitle'     => 'Фрахт и количество рейсов по заказчику',
+    'stats.clients.search'       => 'Поиск клиента',
+    'stats.clients.search_placeholder' => 'Название или рег. №',
+    'stats.clients.days'         => 'дн.',
+    'stats.clients.all_time'     => 'Всё время',
+    'stats.clients.total_trips'  => 'Рейсов всего',
+    'stats.clients.total_freight'=> 'Фрахт всего (EUR)',
+    'stats.clients.col_client'   => 'Клиент',
+    'stats.clients.col_cargos'   => 'Грузы',
+    'stats.clients.col_trips'    => 'Рейсы',
+    'stats.clients.col_freight'  => 'Фрахт (EUR)',
+    'stats.clients.no_data'      => 'Нет данных',
+    'nav.stats_clients'          => 'По клиентам',
+    'stats.expenses_by_category_title'   => 'Расходы по категориям',
+    'stats.expenses_by_category_col_category' => 'Категория',
+    'stats.expenses_by_category_col_amount'   => 'Сумма',
+    'stats.expenses_by_category_col_percent'  => '%',
+    'stats.expenses_by_category_col_liters'   => 'Литры',
+    'stats.expenses_by_category_total'         => 'Итого',
+
     // Stats / Driver events
     'stats.events.hint_expenses' => 'Для расходов топлива и AdBlue показываем литры и одометр; для остальных расходов одометр не отображается.',
     'stats.events.summary_by_trip' => 'Сводка по рейсам',

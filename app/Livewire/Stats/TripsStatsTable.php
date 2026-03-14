@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Stats;
 
+use App\Enums\TripExpenseCategory;
 use App\Models\Trip;
 use App\Models\TripCargo;
 use App\Models\TripExpense;
@@ -261,6 +262,49 @@ class TripsStatsTable extends Component
         ];
     }
 
+    /**
+     * Расходы по категориям за период (по дате рейса), без SUBCONTRACTOR.
+     */
+    private function getExpensesByCategory(): array
+    {
+        $q = TripExpense::query()
+            ->whereHas('trip', function (Builder $t) {
+                if ($this->dateFrom) {
+                    $t->whereDate('trips.start_date', '>=', $this->dateFrom);
+                }
+                if ($this->dateTo) {
+                    $t->whereDate('trips.start_date', '<=', $this->dateTo);
+                }
+            })
+            ->where('category', '!=', TripExpenseCategory::SUBCONTRACTOR->value);
+
+        $rows = $q
+            ->selectRaw('category, COALESCE(SUM(amount), 0) as total_amount, COALESCE(SUM(liters), 0) as total_liters')
+            ->groupBy('category')
+            ->orderByRaw('SUM(amount) DESC')
+            ->get();
+
+        $totalAmount = $rows->sum('total_amount');
+        $items = $rows->map(function ($r) use ($totalAmount) {
+            $label = $r->category
+                ? ($r->category instanceof TripExpenseCategory ? $r->category->label() : (TripExpenseCategory::tryFrom((string) $r->category)?->label() ?? (string) $r->category))
+                : '—';
+            $pct = $totalAmount > 0 ? round((float) $r->total_amount / $totalAmount * 100, 1) : 0;
+            return [
+                'category' => $r->category,
+                'label'    => $label,
+                'amount'   => (float) $r->total_amount,
+                'liters'   => (float) $r->total_liters,
+                'percent'  => $pct,
+            ];
+        })->values()->all();
+
+        return [
+            'items'        => $items,
+            'total_amount' => round($totalAmount, 2),
+        ];
+    }
+
     public function render()
     {
         $allowedSort = [
@@ -309,8 +353,9 @@ class TripsStatsTable extends Component
         }
 
         $chartData = $this->buildChartData($summaryQuery);
+        $expensesByCategory = $this->getExpensesByCategory();
 
-        return view('livewire.stats.trips-stats-table', compact('rows', 'summary', 'chartData'))->layout('layouts.app', [
+        return view('livewire.stats.trips-stats-table', compact('rows', 'summary', 'chartData', 'expensesByCategory'))->layout('layouts.app', [
             'title' => 'Trips stats'
         ]);
     }

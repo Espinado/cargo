@@ -145,6 +145,49 @@
             </div>
         </div>
 
+        {{-- Расходы по категориям --}}
+        @if(!empty($expensesByCategory['items']))
+        <div class="mb-4 rounded-2xl bg-white border border-gray-200 shadow-sm p-4">
+            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                {{ __('app.stats.expenses_by_category_title') }}
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-gray-200 text-left text-gray-500 uppercase text-xs">
+                            <th class="pb-2 pr-4">{{ __('app.stats.expenses_by_category_col_category') }}</th>
+                            <th class="pb-2 pr-4 text-right">{{ __('app.stats.expenses_by_category_col_amount') }}</th>
+                            <th class="pb-2 pr-4 text-right">{{ __('app.stats.expenses_by_category_col_percent') }}</th>
+                            <th class="pb-2 text-right">{{ __('app.stats.expenses_by_category_col_liters') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($expensesByCategory['items'] as $item)
+                        <tr class="border-b border-gray-100">
+                            <td class="py-2 pr-4 font-medium text-gray-900">{{ $item['label'] }}</td>
+                            <td class="py-2 pr-4 text-right tabular-nums">{{ number_format($item['amount'], 2, ',', ' ') }} EUR</td>
+                            <td class="py-2 pr-4 text-right tabular-nums text-gray-600">{{ $item['percent'] }}%</td>
+                            <td class="py-2 text-right tabular-nums">
+                                @if($item['liters'] > 0)
+                                    {{ number_format($item['liters'], 1, ',', ' ') }} L
+                                @else
+                                    —
+                                @endif
+                            </td>
+                        </tr>
+                        @endforeach
+                        <tr class="font-semibold bg-gray-50">
+                            <td class="py-2 pr-4">{{ __('app.stats.expenses_by_category_total') }}</td>
+                            <td class="py-2 pr-4 text-right tabular-nums">{{ number_format($expensesByCategory['total_amount'], 2, ',', ' ') }} EUR</td>
+                            <td class="py-2 pr-4 text-right">100%</td>
+                            <td class="py-2 text-right">—</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @endif
+
         {{-- График по периодам --}}
         @if(!empty($chartData['labels']))
         <div class="mb-4 rounded-2xl bg-white border border-gray-200 shadow-sm p-4">

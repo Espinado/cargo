@@ -2,16 +2,22 @@
 
 namespace App\Livewire\Trucks;
 
-use Livewire\Component;
+use App\Models\Trip;
 use App\Models\Truck;
+use App\Models\TruckOdometerEvent;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Livewire\Component;
 use App\Services\Services\MaponService;
-use Carbon\Carbon;
 
 class ShowTruck extends Component
 {
     public Truck $truck;
+
+    /** Пробег за период */
+    public ?string $mileagePeriodFrom = null;
+    public ?string $mileagePeriodTo = null;
 
     // Mapon UI fields (CAN only)
     public ?float $maponCanMileageKm = null;     // CAN odometer (km)
@@ -30,6 +36,22 @@ class ShowTruck extends Component
     {
         $this->truck = $truck;
         $this->loadMaponData();
+        if ($this->mileagePeriodFrom === null || $this->mileagePeriodTo === null) {
+            $this->mileagePeriodTo = Carbon::now()->toDateString();
+            $this->mileagePeriodFrom = Carbon::now()->subDays(30)->toDateString();
+        }
+    }
+
+    public function setMileagePeriod(int $days): void
+    {
+        $this->mileagePeriodTo = Carbon::now()->toDateString();
+        $this->mileagePeriodFrom = Carbon::now()->subDays($days)->toDateString();
+    }
+
+    public function clearMileagePeriod(): void
+    {
+        $this->mileagePeriodFrom = null;
+        $this->mileagePeriodTo = null;
     }
 
     /**
@@ -157,6 +179,60 @@ public function loadMaponData(): void
         return "mapon:unit:{$unitId}:data:can";
     }
 
+    public function getTruckMileageStatsProperty(): array
+    {
+        $from = $this->mileagePeriodFrom ? Carbon::parse($this->mileagePeriodFrom)->startOfDay() : null;
+        $to = $this->mileagePeriodTo ? Carbon::parse($this->mileagePeriodTo)->endOfDay() : null;
+
+        $q = Trip::query()
+            ->where('truck_id', $this->truck->id)
+            ->select('trips.id', 'trips.start_date', 'trips.odo_start_km', 'trips.odo_end_km');
+
+        if ($from) {
+            $q->whereDate('trips.start_date', '>=', $from);
+        }
+        if ($to) {
+            $q->whereDate('trips.start_date', '<=', $to);
+        }
+
+        $q->addSelect([
+            'departure_odometer' => TruckOdometerEvent::query()
+                ->selectRaw('COALESCE(NULLIF(odometer_km, 0), trips.odo_start_km)')
+                ->whereColumn('trip_id', 'trips.id')
+                ->where('type', TruckOdometerEvent::TYPE_DEPARTURE)
+                ->orderBy('occurred_at', 'asc')
+                ->limit(1),
+            'return_odometer' => TruckOdometerEvent::query()
+                ->selectRaw('COALESCE(NULLIF(odometer_km, 0), trips.odo_end_km)')
+                ->whereColumn('trip_id', 'trips.id')
+                ->where('type', TruckOdometerEvent::TYPE_RETURN)
+                ->orderBy('occurred_at', 'desc')
+                ->limit(1),
+        ]);
+
+        $rows = $q->orderBy('trips.start_date', 'desc')->get();
+
+        $totalKm = 0;
+        $trips = [];
+        foreach ($rows as $t) {
+            $dep = (float) ($t->departure_odometer ?? $t->odo_start_km ?? 0);
+            $ret = (float) ($t->return_odometer ?? $t->odo_end_km ?? 0);
+            $distanceKm = $ret > $dep ? round($ret - $dep, 1) : 0;
+            $totalKm += $distanceKm;
+            $trips[] = [
+                'id' => $t->id,
+                'start_date' => $t->start_date?->format('Y-m-d') ?? '',
+                'distance_km' => $distanceKm,
+            ];
+        }
+
+        return [
+            'total_km' => round($totalKm, 1),
+            'trips_count' => $rows->count(),
+            'trips' => $trips,
+        ];
+    }
+
     public function destroy()
     {
         if ($this->truck) {
@@ -171,7 +247,8 @@ public function loadMaponData(): void
 
     public function render()
     {
-        return view('livewire.trucks.show-truck')
+        $mileageStats = $this->truckMileageStats;
+        return view('livewire.trucks.show-truck', compact('mileageStats'))
             ->layout('layouts.app', [
                 'title' => __('app.truck.show.title'),
             ]);

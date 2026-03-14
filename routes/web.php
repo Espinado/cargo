@@ -11,6 +11,7 @@ use App\Livewire\TrailersTable;
 use App\Livewire\ClientsTable;
 
 use App\Livewire\Stats\TripsStatsTable;
+use App\Livewire\Stats\ClientsStatsTable;
 
 use App\Livewire\Drivers\{ShowDriver, EditDriver, CreateDriver};
 use App\Livewire\Trucks\{ShowTruck, EditTruck, CreateTruck};
@@ -129,6 +130,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/stats', TripsStatsTable::class)->name('stats.index');
 
      Route::get('/stats/events', EventsTable::class)->name('stats.events');
+     Route::get('/stats/clients', ClientsStatsTable::class)->name('stats.clients');
 
     // CMR generate
     Route::post('/cmr/{cargo}/generate', [CmrController::class, 'generateAndSave'])
