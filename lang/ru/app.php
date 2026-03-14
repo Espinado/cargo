@@ -46,6 +46,7 @@ return [
     'stats.clients.subtitle'     => 'Фрахт и количество рейсов по заказчику',
     'stats.clients.search'       => 'Поиск клиента',
     'stats.clients.search_placeholder' => 'Название или рег. №',
+    'stats.clients.search_clear'       => 'Сбросить',
     'stats.clients.days'         => 'дн.',
     'stats.clients.all_time'     => 'Всё время',
     'stats.clients.total_trips'  => 'Рейсов всего',
@@ -275,5 +276,18 @@ return [
     'inv.receivables_total'        => 'Сумма задолженности',
     'inv.receivables_with_balance' => 'Счётов с остатком',
     'inv.receivables_overdue'      => 'Просрочено',
+
+    // Map (fleet map page)
+    'nav.map'              => 'Карта',
+    'map.title'            => 'Карта — все транспортные средства',
+    'map.refresh'          => 'Обновить',
+    'map.refreshing'       => 'Обновление…',
+    'map.no_units'         => 'Нет данных от Mapon. Проверьте API-ключи или попробуйте позже.',
+    'map.search_label'     => 'Поиск авто',
+    'map.search_placeholder' => 'Номер или название…',
+    'map.search_no_results'=> 'Ничего не найдено.',
+    'truck.show.mapon_standing' => 'Стоит',
+    'truck.show.mapon_moving'   => 'В движении',
+    'truck.show.mapon_kmh'     => 'км/ч',
 ];
 

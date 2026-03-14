@@ -13,12 +13,23 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
                 <div class="lg:col-span-2">
                     <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">{{ __('app.stats.clients.search') }}</label>
-                    <input
-                        type="text"
-                        wire:model.live.debounce.300ms="search"
-                        placeholder="{{ __('app.stats.clients.search_placeholder') }}"
-                        class="w-full px-3 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500"
-                    >
+                    <div class="relative">
+                        <input
+                            type="text"
+                            wire:model.live.debounce.300ms="search"
+                            placeholder="{{ __('app.stats.clients.search_placeholder') }}"
+                            class="w-full px-3 py-2.5 pr-9 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500"
+                        >
+                        @if(strlen($search) > 0)
+                            <button type="button"
+                                    wire:click="clearSearch"
+                                    class="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 dark:hover:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+                                    title="{{ __('app.stats.clients.search_clear') }}"
+                                    aria-label="{{ __('app.stats.clients.search_clear') }}">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        @endif
+                    </div>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">{{ __('app.stats.date_from') }}</label>

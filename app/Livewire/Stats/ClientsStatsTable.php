@@ -30,6 +30,11 @@ class ClientsStatsTable extends Component
     public function updatedDateFrom(): void {}
     public function updatedDateTo(): void {}
 
+    public function clearSearch(): void
+    {
+        $this->search = '';
+    }
+
     public function clearDates(): void
     {
         $this->dateFrom = null;

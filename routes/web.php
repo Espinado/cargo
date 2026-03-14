@@ -20,6 +20,7 @@ use App\Livewire\Clients\{ShowClient, EditClient, CreateClient};
 
 use App\Livewire\TripsTable;
 use App\Livewire\Trips\{CreateTrip, ViewTrip, EditTrip};
+use App\Livewire\Map\FleetMap;
 
 use App\Livewire\Invoices\InvoicesTable;
 use App\Models\Invoice;
@@ -92,6 +93,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'Cache-Control' => 'public, max-age=86400',
         ]);
     })->whereNumber(['z', 'x', 'y'])->name('map.tiles');
+
+    Route::get('/map', FleetMap::class)->name('map.index');
 
     // Drivers
     Route::get('/drivers', DriversTable::class)->name('drivers.index');
