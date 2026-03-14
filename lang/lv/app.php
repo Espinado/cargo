@@ -761,6 +761,12 @@ return [
     'inv.payment.cancel'    => 'Atcelt',
     'inv.payment.add'       => '➕ Maksājums',
 
+    // Receivables summary (invoices page)
+    'inv.receivables_title'       => 'Debitoru parādi',
+    'inv.receivables_total'       => 'Kopā parāds',
+    'inv.receivables_with_balance'=> 'Rēķini ar atlikumu',
+    'inv.receivables_overdue'     => 'Kavēti rēķini',
+
     // Driver app: bottom bar
     'driver.app_short'          => 'Vadītāji',
     'driver.nav.home'           => 'Sākums',

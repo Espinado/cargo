@@ -244,5 +244,11 @@ return [
 
     'trip.validation.err_driver_overlap' => 'Выбранный водитель уже назначен на другой рейс в этот период. Один рейс = один водитель.',
     'trip.validation.err_truck_overlap'   => 'Выбранная машина уже назначена на другой рейс в этот период. Один рейс = одна машина.',
+
+    // Receivables summary (invoices page)
+    'inv.receivables_title'        => 'Дебиторская задолженность',
+    'inv.receivables_total'        => 'Сумма задолженности',
+    'inv.receivables_with_balance' => 'Счётов с остатком',
+    'inv.receivables_overdue'      => 'Просрочено',
 ];
 

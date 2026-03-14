@@ -3,28 +3,25 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Artisan;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // === Очередность имеет значение ===
+        $this->command->info('Refreshing database...');
+        Artisan::call('migrate:fresh', ['--force' => true]);
+
+        $this->command->info('Seeding...');
+        // Очередность как в Fleet Manager: компании → клиенты → техника → водители → админы → рейсы
         $this->call([
-            ClientsTableSeeder::class,
-            ClientsFullSeeder::class,
             CompaniesSeeder::class,
-            CarrierExpeditorCompaniesSeeder::class,
+            ClientsTableSeeder::class,
             TruckSeeder::class,
             TrailerSeeder::class,
             DriverSeeder::class,
-            FleetExtraSeeder::class,
-            CarrierDriversSeeder::class,
-            CarrierTrucksSeeder::class,
-            CarrierTrailersSeeder::class,
             AdminUserSeeder::class,
-            FortyTripsFullSeeder::class,
-            NotikumiEventsSeeder::class,
-            FakeInvoicesSeeder::class,
+            TripsFullSeeder::class,
         ]);
     }
 }
