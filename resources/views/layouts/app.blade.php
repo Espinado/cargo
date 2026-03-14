@@ -68,6 +68,7 @@
             $statsOverviewActive = request()->routeIs('stats.index');
             $statsEventsActive   = request()->routeIs('stats.events') || request()->routeIs('stats.events.*');
             $statsClientsActive   = request()->routeIs('stats.clients');
+            $statsDowntimeActive   = request()->routeIs('stats.downtime');
              $transportOpen = request()->routeIs('trucks.*') || request()->routeIs('trailers.*');
 
     $trucksActive = request()->routeIs('trucks.*');
@@ -152,6 +153,11 @@
                     <a href="{{ route('stats.clients') }}" wire:navigate
                        @class([$navBase, $statsClientsActive ? $navActive : $navIdle])>
                         🏢 {{ __('app.nav.stats_clients') }}
+                    </a>
+
+                    <a href="{{ route('stats.downtime') }}" wire:navigate
+                       @class([$navBase, $statsDowntimeActive ? $navActive : $navIdle])>
+                        ⏱ {{ __('app.nav.stats_downtime') }}
                     </a>
                 </div>
             </details>

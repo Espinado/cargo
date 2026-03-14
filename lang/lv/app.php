@@ -98,6 +98,17 @@ return [
     'stats.clients.col_freight'  => 'Frakts (EUR)',
     'stats.clients.no_data'      => 'Nav datu',
 
+    'stats.downtime.title'       => 'Dīkstāve (prostoji)',
+    'stats.downtime.subtitle'    => 'Kavējumi / dīkstāve pa reisiem un klientiem',
+    'stats.downtime.total_days'  => 'Dienas kopā',
+    'stats.downtime.total_amount'=> 'Summa kopā (EUR)',
+    'stats.downtime.col_date'    => 'Datums',
+    'stats.downtime.col_client'  => 'Klients',
+    'stats.downtime.col_days'    => 'Dienas',
+    'stats.downtime.col_amount'  => 'Summa (EUR)',
+    'stats.downtime.col_trip'    => 'Reiss',
+    'stats.downtime.no_data'     => 'Nav datu par dīkstāvi.',
+
     // Sidebar / navigation
     'nav.dashboard'         => 'Panelis',
     'nav.drivers'           => 'Vadītāji',
@@ -110,6 +121,7 @@ return [
     'nav.stats_overview'    => 'Pārskats',
     'nav.stats_events'      => 'Notikumi',
     'nav.stats_clients'     => 'Pa klientiem',
+    'nav.stats_downtime'     => 'Dīkstāve',
     'nav.invoices'          => 'Rēķini',
     'nav.map'              => 'Karte',
     'nav.hello'             => 'Sveiki, :name',
