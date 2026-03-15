@@ -261,6 +261,17 @@
         openBtn?.addEventListener('click', openSidebarMenu);
         closeBtn?.addEventListener('click', closeSidebarMenu);
         overlay?.addEventListener('click', closeSidebarMenu);
+
+        // Аккордеон: при открытии одного подменю закрывать остальные
+        const nav = document.querySelector('#sidebar nav');
+        if (nav) {
+            nav.addEventListener('toggle', function(e) {
+                if (e.target.tagName !== 'DETAILS' || !e.target.open) return;
+                nav.querySelectorAll('details').forEach(function(d) {
+                    if (d !== e.target) d.removeAttribute('open');
+                });
+            }, true);
+        }
     </script>
 
     {{-- При 419 (Page expired) редирект на логин — перехват до загрузки Livewire --}}
