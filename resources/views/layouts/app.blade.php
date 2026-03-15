@@ -239,39 +239,49 @@
         </main>
     </div>
 
-    {{-- Sidebar JS: делегирование кликов (как во Fleet), чтобы кнопка работала после Livewire morph --}}
+    {{-- Sidebar JS: делегирование на document, чтобы гамбургер и закрытие работали после Livewire morph (смена раздела) --}}
     <script>
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
-        const openBtn = document.getElementById('openSidebar');
-        const closeBtn = document.getElementById('closeSidebar');
+        (function() {
+            function openSidebarMenu() {
+                var sidebar = document.getElementById('sidebar');
+                var overlay = document.getElementById('overlay');
+                if (sidebar) sidebar.classList.remove('-translate-x-full');
+                if (overlay) {
+                    overlay.classList.remove('hidden');
+                    requestAnimationFrame(function() { overlay.classList.add('opacity-100'); });
+                }
+            }
+            function closeSidebarMenu() {
+                var sidebar = document.getElementById('sidebar');
+                var overlay = document.getElementById('overlay');
+                if (sidebar) sidebar.classList.add('-translate-x-full');
+                if (overlay) {
+                    overlay.classList.remove('opacity-100');
+                    overlay.addEventListener('transitionend', function() { overlay.classList.add('hidden'); }, { once: true });
+                }
+            }
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('#openSidebar')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openSidebarMenu();
+                    return;
+                }
+                if (e.target.closest('#closeSidebar') || e.target.id === 'overlay') {
+                    closeSidebarMenu();
+                }
+            });
 
-        function openSidebarMenu() {
-            sidebar.classList.remove('-translate-x-full');
-            overlay.classList.remove('hidden');
-            requestAnimationFrame(() => overlay.classList.add('opacity-100'));
-        }
-
-        function closeSidebarMenu() {
-            sidebar.classList.add('-translate-x-full');
-            overlay.classList.remove('opacity-100');
-            overlay.addEventListener('transitionend', () => overlay.classList.add('hidden'), { once: true });
-        }
-
-        openBtn?.addEventListener('click', openSidebarMenu);
-        closeBtn?.addEventListener('click', closeSidebarMenu);
-        overlay?.addEventListener('click', closeSidebarMenu);
-
-        // Аккордеон: при открытии одного подменю закрывать остальные
-        const nav = document.querySelector('#sidebar nav');
-        if (nav) {
-            nav.addEventListener('toggle', function(e) {
+            // Аккордеон: при открытии одного подменю закрывать остальные (делегирование — работает после morph)
+            document.addEventListener('toggle', function(e) {
                 if (e.target.tagName !== 'DETAILS' || !e.target.open) return;
+                var nav = e.target.closest('#sidebar nav');
+                if (!nav) return;
                 nav.querySelectorAll('details').forEach(function(d) {
                     if (d !== e.target) d.removeAttribute('open');
                 });
             }, true);
-        }
+        })();
     </script>
 
     {{-- При 419 (Page expired) редирект на логин — перехват до загрузки Livewire --}}
