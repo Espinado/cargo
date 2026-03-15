@@ -337,12 +337,32 @@ class TripsStatsTable extends Component
 
         // Сводка по тем же фильтрам (без дублирования: те же dateFrom/dateTo/search)
         $summaryQuery = (clone $q)->get();
+        $totalKm = $summaryQuery->sum(function ($t) {
+            $dep = (float) ($t->departure_odometer ?? $t->odo_start_km ?? 0);
+            $ret = (float) ($t->return_odometer ?? $t->odo_end_km ?? 0);
+            return $ret > $dep ? $ret - $dep : 0;
+        });
+        $tripIds = $summaryQuery->pluck('id')->filter()->values()->all();
+        $totalExpensesExclSub = 0.0;
+        if ($tripIds !== []) {
+            $totalExpensesExclSub = (float) TripExpense::query()
+                ->whereIn('trip_id', $tripIds)
+                ->where(function (Builder $qb) {
+                    $qb->whereNull('category')
+                        ->orWhere('category', '!=', TripExpenseCategory::SUBCONTRACTOR->value);
+                })
+                ->sum('amount');
+        }
+        $costPerKm = $totalKm > 0 ? round($totalExpensesExclSub / $totalKm, 2) : null;
+
         $summary = (object) [
             'trips_count'        => $summaryQuery->count(),
             'total_freight'      => round($summaryQuery->sum('freight_total'), 2),
             'total_expenses'     => round($summaryQuery->sum('expenses_total'), 2),
             'total_profit'       => round($summaryQuery->sum('profit'), 2),
             'avg_margin_percent' => null,
+            'total_km'           => round($totalKm, 1),
+            'cost_per_km'        => $costPerKm,
         ];
         $withFreight = $summaryQuery->filter(fn ($t) => (float) ($t->freight_total ?? 0) > 0);
         if ($withFreight->isNotEmpty()) {

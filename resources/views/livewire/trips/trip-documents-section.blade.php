@@ -152,7 +152,7 @@
 
                 <input type="file"
                        wire:model.live="documentFile"
-                       accept="image/*,application/pdf"
+                       accept="image/*"
                        class="block w-full text-sm text-gray-600 dark:text-gray-200
                               file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0
                               file:bg-indigo-50 dark:file:bg-indigo-900/40

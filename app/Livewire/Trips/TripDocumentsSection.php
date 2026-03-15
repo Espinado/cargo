@@ -24,7 +24,7 @@ class TripDocumentsSection extends Component
     protected $rules = [
         'type'         => 'required|string',
         'name'         => 'required|string|min:3',
-        'documentFile' => 'required|file',
+        'documentFile' => 'required|file|mimes:jpg,jpeg,png,gif,webp',
     ];
 
     public function mount()

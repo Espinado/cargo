@@ -117,7 +117,7 @@
             <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
                 {{ __('app.stats.summary_period') }}
             </div>
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
                 <div class="rounded-xl bg-gray-50 border border-gray-100 p-3">
                     <div class="text-xs text-gray-500 mb-0.5">{{ __('app.stats.summary_trips') }}</div>
                     <div class="text-lg font-bold text-gray-900">{{ number_format($summary->trips_count, 0, '.', ' ') }}</div>
@@ -138,6 +138,14 @@
                     <div class="text-xs text-gray-500 mb-0.5">{{ __('app.stats.margin') }} %</div>
                     @if($summary->avg_margin_percent !== null)
                         <div class="text-lg font-bold text-gray-900">{{ number_format($summary->avg_margin_percent, 1, '.', ' ') }}%</div>
+                    @else
+                        <div class="text-lg font-bold text-gray-400">—</div>
+                    @endif
+                </div>
+                <div class="rounded-xl bg-gray-50 border border-gray-100 p-3">
+                    <div class="text-xs text-gray-500 mb-0.5">{{ __('app.stats.cost_per_km') }}</div>
+                    @if(isset($summary->cost_per_km) && $summary->cost_per_km !== null)
+                        <div class="text-lg font-bold text-gray-900">{{ number_format($summary->cost_per_km, 2, '.', ' ') }} <span class="text-xs font-normal text-gray-500">EUR/km</span></div>
                     @else
                         <div class="text-lg font-bold text-gray-400">—</div>
                     @endif

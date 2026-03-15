@@ -399,8 +399,9 @@ class EventsTable extends Component
             ];
         }
 
-        // Если выбран тип «не расходы» — в таблице расходов нет, сводка пустая
-        if ($this->type !== null && (int) $this->type !== TruckOdometerEvent::TYPE_EXPENSE) {
+        // Сводка по расходам: показываем всегда за весь период (по фильтрам), кроме случая когда выбран тип «только не расходы»
+        $typeInt = $this->type !== null && $this->type !== '' ? (int) $this->type : null;
+        if ($typeInt !== null && $typeInt !== TruckOdometerEvent::TYPE_EXPENSE) {
             return [
                 'liters_items'  => [],
                 'by_category'   => [],
