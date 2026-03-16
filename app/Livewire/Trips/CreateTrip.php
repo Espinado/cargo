@@ -110,6 +110,8 @@ class CreateTrip extends Component
     public array $from_order_ids = [];
     /** Выбор заказов в форме (многократный выбор) — по кнопке «Применить» вызывается setOrdersForTrip */
     public array $selected_order_ids_input = [];
+    /** Показать зелёное уведомление «Заказ(ы) добавлены» после Apply */
+    public bool $showOrderAddedMessage = false;
 
     /** ============================================================
      *  TRIP
@@ -243,7 +245,12 @@ class CreateTrip extends Component
         $this->steps = [];
         $this->stepCities = [];
         $orderNum = 0;
-        foreach ($orders as $order) {
+        /** @var array<int, array{loading: string[], unloading: string[]}> step UIDs per order index */
+        $orderStepUids = [];
+        $allLoadingUids = [];
+        $allUnloadingUids = [];
+        foreach ($orders as $orderIndex => $order) {
+            $orderStepUids[$orderIndex] = ['loading' => [], 'unloading' => []];
             foreach ($order->steps->sortBy('order') as $os) {
                 $cities = $os->country_id && function_exists('getCitiesByCountryId')
                     ? (getCitiesByCountryId((int) $os->country_id) ?? [])
@@ -253,9 +260,10 @@ class CreateTrip extends Component
                     $cityId = $this->resolveCityIdFromAddress($os->address, $cities);
                 }
                 $uid = (string) Str::uuid();
+                $stepType = $os->type ?? 'loading';
                 $this->steps[] = [
                     'uid'             => $uid,
-                    'type'            => $os->type ?? 'loading',
+                    'type'            => $stepType,
                     'country_id'      => $os->country_id,
                     'city_id'         => $cityId,
                     'address'         => $os->address,
@@ -266,26 +274,30 @@ class CreateTrip extends Component
                     'order'           => ++$orderNum,
                     'notes'           => $os->notes,
                 ];
-                $this->stepCities[] = [
-                    'cities' => $cities,
-                ];
+                $this->stepCities[] = ['cities' => $cities];
+                if ($stepType === 'loading') {
+                    $orderStepUids[$orderIndex]['loading'][] = $uid;
+                    $allLoadingUids[] = $uid;
+                }
+                if ($stepType === 'unloading') {
+                    $orderStepUids[$orderIndex]['unloading'][] = $uid;
+                    $allUnloadingUids[] = $uid;
+                }
             }
         }
-        $loadingUids = [];
-        $unloadingUids = [];
-        foreach ($this->steps as $s) {
-            if (($s['type'] ?? '') === 'loading') {
-                $loadingUids[] = $s['uid'];
-            }
-            if (($s['type'] ?? '') === 'unloading') {
-                $unloadingUids[] = $s['uid'];
-            }
-        }
-        $this->trip_loading_step_ids = array_slice($loadingUids, 0, 1);
-        $this->trip_unloading_step_ids = array_slice($unloadingUids, 0, 1);
+        $this->trip_loading_step_ids = $allLoadingUids;
+        $this->trip_unloading_step_ids = $allUnloadingUids;
 
         $this->cargos = [];
-        foreach ($orders as $order) {
+        foreach ($orders as $orderIndex => $order) {
+            $loadUids = $orderStepUids[$orderIndex]['loading'] ?? [];
+            $unloadUids = $orderStepUids[$orderIndex]['unloading'] ?? [];
+            if ($loadUids === []) {
+                $loadUids = array_slice($allLoadingUids, 0, 1);
+            }
+            if ($unloadUids === []) {
+                $unloadUids = array_slice($allUnloadingUids, 0, 1);
+            }
             foreach ($order->cargos as $oc) {
                 $price = $oc->quoted_price !== null ? (string) $oc->quoted_price : '';
                 $this->cargos[] = [
@@ -293,8 +305,8 @@ class CreateTrip extends Component
                     'customer_id'              => $oc->customer_id,
                     'shipper_id'               => $oc->shipper_id ?? $oc->customer_id,
                     'consignee_id'             => $oc->consignee_id ?? $oc->customer_id,
-                    'loading_step_ids'         => $this->trip_loading_step_ids,
-                    'unloading_step_ids'       => $this->trip_unloading_step_ids,
+                    'loading_step_ids'         => $loadUids,
+                    'unloading_step_ids'       => $unloadUids,
                     'price'                    => $price,
                     'tax_percent'              => 21,
                     'total_tax_amount'        => 0,
@@ -361,10 +373,12 @@ class CreateTrip extends Component
         return null;
     }
 
-    /** Apply selected order IDs (from multi-select): prefill form from these orders. */
+    /** Apply selected order IDs (from multi-select): merge into trip form (adds to existing, does not replace). */
     public function setOrdersForTrip(): void
     {
-        $ids = array_values(array_unique(array_filter(array_map('intval', $this->selected_order_ids_input ?? []))));
+        $selected = array_values(array_unique(array_filter(array_map('intval', $this->selected_order_ids_input ?? []))));
+        $existing = array_values(array_filter(array_map('intval', $this->from_order_ids ?? [])));
+        $ids = array_values(array_unique(array_merge($existing, $selected)));
         if (empty($ids)) {
             return;
         }
@@ -374,6 +388,35 @@ class CreateTrip extends Component
         $this->from_order_ids = $ids;
         $this->from_order_id = $ids[0];
         $this->prefillFromOrderIds($this->from_order_ids);
+        $this->selected_order_ids_input = $this->from_order_ids;
+        $this->showOrderAddedMessage = true;
+    }
+
+    /** Remove one order from the trip (form updates; order becomes available for other trips). */
+    public function removeOrderFromTrip(int $orderId): void
+    {
+        $orderId = (int) $orderId;
+        if (!in_array($orderId, $this->from_order_ids, true)) {
+            return;
+        }
+        TransportOrder::where('id', $orderId)->update([
+            'trip_id' => null,
+            'status'  => OrderStatus::CONFIRMED->value,
+        ]);
+        $this->from_order_ids = array_values(array_filter($this->from_order_ids, fn ($id) => (int) $id !== $orderId));
+        $this->from_order_id = $this->from_order_ids[0] ?? null;
+        if (!empty($this->from_order_ids)) {
+            $this->prefillFromOrderIds($this->from_order_ids);
+            $this->selected_order_ids_input = $this->from_order_ids;
+        } else {
+            $this->steps = [];
+            $this->stepCities = [];
+            $this->cargos = [];
+            $this->addStep();
+            $this->addCargo();
+            $this->selected_order_ids_input = [];
+        }
+        $this->showOrderAddedMessage = false;
     }
 
     /** ============================================================
@@ -1563,12 +1606,23 @@ class CreateTrip extends Component
             ->orderBy('name')
             ->get(['id', 'name', 'type']);
 
-        $availableOrders = TransportOrder::with(['expeditor', 'customer'])
+        $availableOrdersQuery = TransportOrder::with(['expeditor', 'customer', 'steps', 'cargos.shipper', 'cargos.consignee'])
             ->whereIn('status', ['draft', 'quoted', 'confirmed'])
             ->whereNull('trip_id')
             ->orderBy('order_date')
-            ->orderBy('id')
-            ->get(['id', 'number', 'order_date', 'expeditor_id', 'customer_id', 'status']);
+            ->orderBy('id');
+        if (!empty($this->from_order_ids)) {
+            $availableOrdersQuery->whereNotIn('id', $this->from_order_ids);
+        }
+        $availableOrders = $availableOrdersQuery->get();
+
+        $attachedOrders = collect();
+        if (!empty($this->from_order_ids)) {
+            $attachedOrders = TransportOrder::with(['steps', 'cargos.shipper', 'cargos.consignee', 'customer'])
+                ->whereIn('id', $this->from_order_ids)
+                ->orderByRaw('FIELD(id, ' . implode(',', array_map('intval', $this->from_order_ids)) . ')')
+                ->get();
+        }
 
         return view('livewire.trips.create-trip', [
             'clients'            => Client::orderBy('company_name')->get(),
@@ -1580,6 +1634,7 @@ class CreateTrip extends Component
             'payers'             => $this->payers,
             'taxRates'           => $this->taxRates,
             'availableOrders'    => $availableOrders,
+            'attachedOrders'     => $attachedOrders,
 
             // trailer meta / container flag
             'isContainerTrailer' => $this->isContainerTrailer,
