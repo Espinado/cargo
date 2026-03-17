@@ -459,6 +459,8 @@ return [
     'track.completed_title'   => 'Доставка завершена',
     'track.completed_heading' => 'Доставка завершена',
     'track.completed_message' => 'Разгрузка этого груза завершена. Ссылка больше недействительна.',
+    'track.link_per_cargo'    => 'Ссылка отслеживания для этого груза',
+    'track.cargo_for'         => 'Груз: :sender → :recipient',
 
     // Map (fleet map page)
     'nav.orders'            => 'Заказы',

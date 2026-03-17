@@ -996,6 +996,8 @@ return [
     'track.completed_title'   => 'Piegāde pabeigta',
     'track.completed_heading' => 'Piegāde pabeigta',
     'track.completed_message' => 'Šīs kravas izkraušana ir pabeigta. Saites vairs nav aktīva.',
+    'track.link_per_cargo'    => 'Saites uz novērošanu šai kravai',
+    'track.cargo_for'         => 'Krava: :sender → :recipient',
 
     'pagination.previous'     => 'Iepriekšējā',
     'pagination.next'         => 'Nākamā',

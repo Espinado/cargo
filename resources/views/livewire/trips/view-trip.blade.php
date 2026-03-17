@@ -452,6 +452,47 @@
             </div>
         </div>
 
+        {{-- Публичные ссылки отслеживания по грузу (клиент видит только свой груз; после разгрузки ссылка недействительна) --}}
+        <div class="mt-4 space-y-3">
+            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('app.track.link_title') }}</p>
+            @foreach($trip->cargos as $cargo)
+                @php
+                    $sender = $cargo->shipper?->company_name ?? $cargo->customer?->company_name ?? '—';
+                    $recipient = $cargo->consignee?->company_name ?? '—';
+                @endphp
+                <div class="p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50" x-data="{ copied: false }">
+                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">{{ __('app.track.cargo_for', ['sender' => $sender, 'recipient' => $recipient]) }}</p>
+                    @if($cargo->tracking_token)
+                        <div class="flex flex-wrap items-center gap-2">
+                            <code class="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded truncate max-w-full">{{ route('track.show', $cargo->tracking_token) }}</code>
+                            <button type="button"
+                                    @click="navigator.clipboard && navigator.clipboard.writeText('{{ route('track.show', $cargo->tracking_token) }}').then(() => { copied = true; setTimeout(() => copied = false, 2000); })"
+                                    class="shrink-0 px-2 py-1 rounded text-xs font-medium bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-900/40 dark:text-amber-200">
+                                <span x-show="!copied">{{ __('app.track.copy_link') }}</span>
+                                <span x-show="copied" x-cloak>{{ __('app.track.copied') }}</span>
+                            </button>
+                            <a href="{{ route('track.show', $cargo->tracking_token) }}" target="_blank" rel="noopener"
+                               class="shrink-0 text-xs text-blue-600 hover:underline">↗ {{ __('app.track.title') }}</a>
+                            @if($trip->status !== \App\Enums\TripStatus::COMPLETED)
+                                <button type="button" wire:click="disableCargoTracking({{ $cargo->id }})" data-no-loading-overlay
+                                        class="shrink-0 px-2 py-1 rounded text-xs font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
+                                    {{ __('app.track.disable') }}
+                                </button>
+                            @endif
+                        </div>
+                    @else
+                        <button type="button" wire:click="enableCargoTracking({{ $cargo->id }})" data-no-loading-overlay
+                                class="px-3 py-1.5 rounded-lg text-sm font-medium bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-900/40 dark:text-amber-200">
+                            {{ __('app.track.enable') }}
+                        </button>
+                    @endif
+                </div>
+            @endforeach
+            @if($trip->cargos->isEmpty())
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.trip.show.cargos') }}: 0. {{ __('app.track.link_per_cargo') }}</p>
+            @endif
+        </div>
+
         <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 mt-4 text-xs sm:text-sm">
 
             <div class="border rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-800">

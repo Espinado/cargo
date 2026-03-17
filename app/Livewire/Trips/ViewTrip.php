@@ -79,6 +79,26 @@ class ViewTrip extends Component
         $this->hydrateCargoInputsFromTrip();
     }
 
+    /** Включить публичную ссылку отслеживания для груза (клиент видит только свой груз; после разгрузки ссылка недействительна). */
+    public function enableCargoTracking(int $cargoId): void
+    {
+        $cargo = $this->trip->cargos->firstWhere('id', $cargoId);
+        if ($cargo) {
+            $cargo->enableTracking();
+            $this->reloadTrip();
+        }
+    }
+
+    /** Отключить публичную ссылку отслеживания для груза. */
+    public function disableCargoTracking(int $cargoId): void
+    {
+        $cargo = $this->trip->cargos->firstWhere('id', $cargoId);
+        if ($cargo) {
+            $cargo->disableTracking();
+            $this->reloadTrip();
+        }
+    }
+
     /** Fill cmrNr, orderNr, invNr, delayChecked, delayDays, delayAmount for all current cargos (fixes Entangle after sync adds new cargos). */
     protected function hydrateCargoInputsFromTrip(): void
     {
