@@ -70,6 +70,8 @@ return [
     'nav.stats_downtime'         => 'Простои',
     'nav.stats_owner'            => 'Панель владельца',
     'nav.carriers'               => 'Перевозчики',
+    'stats.expenses_road'   => 'Дорожные расходы',
+    'stats.expenses_maintenance' => 'Обслуживание (ТО)',
     'stats.expenses_by_category_title'   => 'Расходы по категориям',
     'stats.expenses_by_category_col_category' => 'Категория',
     'stats.expenses_by_category_col_amount'   => 'Сумма',
