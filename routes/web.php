@@ -14,6 +14,11 @@ use App\Livewire\Stats\TripsStatsTable;
 use App\Livewire\Stats\ClientsStatsTable;
 use App\Livewire\Stats\DowntimeStatsTable;
 use App\Livewire\Stats\OwnerDashboard;
+use App\Livewire\Maintenance\MaintenanceIndex;
+use App\Livewire\Maintenance\MaintenanceRecordsJournal;
+use App\Livewire\Maintenance\CreateMaintenanceRecord;
+use App\Livewire\Maintenance\EditMaintenanceRecord;
+use App\Livewire\Maintenance\ShowMaintenanceRecord;
 
 use App\Livewire\Drivers\{ShowDriver, EditDriver, CreateDriver};
 use App\Livewire\Trucks\{ShowTruck, EditTruck, CreateTruck};
@@ -136,6 +141,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/orders/create', CreateOrder::class)->name('orders.create');
     Route::get('/orders/{transportOrder}', ShowOrder::class)->name('orders.show');
     Route::get('/orders/{transportOrder}/edit', EditOrder::class)->name('orders.edit');
+
+    // Maintenance (Fleet Maintenance — предстоящее ТО)
+    Route::get('/maintenance', MaintenanceIndex::class)->name('maintenance.index');
+    Route::get('/maintenance/records', MaintenanceRecordsJournal::class)->name('maintenance.records.index');
+    Route::get('/maintenance/records/create', CreateMaintenanceRecord::class)->name('maintenance.records.create');
+    Route::get('/maintenance/records/{record}', ShowMaintenanceRecord::class)->name('maintenance.records.show')
+        ->where('record', '[0-9]+');
+    Route::get('/maintenance/records/{record}/edit', EditMaintenanceRecord::class)->name('maintenance.records.edit')
+        ->where('record', '[0-9]+');
 
     // Carriers (external / third-party directory)
     Route::get('/carriers', CarriersTable::class)->name('carriers.index');

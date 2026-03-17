@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Trailer extends Model
 {
@@ -32,6 +33,10 @@ class Trailer extends Model
                 'tech_passport_issued',
                 'tech_passport_expired',
                 'tech_passport_photo',
+        'next_service_km',
+        'next_service_date',
+        'service_interval_km',
+        'service_interval_months',
     ];
 
     protected $casts = [
@@ -43,6 +48,7 @@ class Trailer extends Model
         'tech_passport_expired' => 'date',
         'tir_issued' => 'date',
         'tir_expired' => 'date',
+        'next_service_date' => 'date',
     ];
 
     /**
@@ -82,5 +88,10 @@ public function getTypeIconAttribute(): ?string
 public function company()
 {
     return $this->belongsTo(\App\Models\Company::class);
+}
+
+public function maintenanceRecords(): HasMany
+{
+    return $this->hasMany(\App\Models\VehicleMaintenance::class, 'trailer_id')->orderByDesc('performed_at');
 }
 }
