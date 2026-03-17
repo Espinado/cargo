@@ -13,6 +13,7 @@ use App\Livewire\ClientsTable;
 use App\Livewire\Stats\TripsStatsTable;
 use App\Livewire\Stats\ClientsStatsTable;
 use App\Livewire\Stats\DowntimeStatsTable;
+use App\Livewire\Stats\OwnerDashboard;
 
 use App\Livewire\Drivers\{ShowDriver, EditDriver, CreateDriver};
 use App\Livewire\Trucks\{ShowTruck, EditTruck, CreateTruck};
@@ -22,16 +23,21 @@ use App\Livewire\Clients\{ShowClient, EditClient, CreateClient};
 use App\Livewire\TripsTable;
 use App\Livewire\Trips\{CreateTrip, ViewTrip, EditTrip};
 use App\Livewire\Orders\{OrdersTable, ShowOrder, CreateOrder, EditOrder};
+use App\Livewire\Carriers\{CarriersTable, CreateCarrier, ShowCarrier, EditCarrier};
 use App\Livewire\Map\FleetMap;
 
 use App\Livewire\Invoices\InvoicesTable;
 use App\Models\Invoice;
 use Illuminate\Support\Facades\Storage;
 use App\Livewire\Stats\EventsTable;
+use App\Http\Controllers\PublicTripTrackingController;
 
 
 
 use App\Notifications\TestPushNotification;
+
+// Публичное отслеживание рейса (без входа)
+Route::get('/track/{token}', [PublicTripTrackingController::class, 'show'])->name('track.show');
 
 // Главная страница
 Route::redirect('/', '/dashboard');
@@ -131,6 +137,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/orders/{transportOrder}', ShowOrder::class)->name('orders.show');
     Route::get('/orders/{transportOrder}/edit', EditOrder::class)->name('orders.edit');
 
+    // Carriers (external / third-party directory)
+    Route::get('/carriers', CarriersTable::class)->name('carriers.index');
+    Route::get('/carriers/create', CreateCarrier::class)->name('carriers.create');
+    Route::get('/carriers/{carrier}', ShowCarrier::class)->name('carriers.show');
+    Route::get('/carriers/{carrier}/edit', EditCarrier::class)->name('carriers.edit');
+
     // Trips
     Route::get('/trips', TripsTable::class)->name('trips.index');
     Route::get('/trips/create', CreateTrip::class)->name('trips.create');
@@ -139,6 +151,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
      // Stats
     Route::get('/stats', TripsStatsTable::class)->name('stats.index');
+    Route::get('/stats/owner', OwnerDashboard::class)->name('stats.owner');
 
      Route::get('/stats/events', EventsTable::class)->name('stats.events');
      Route::get('/stats/clients', ClientsStatsTable::class)->name('stats.clients');
