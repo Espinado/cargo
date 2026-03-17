@@ -62,15 +62,9 @@
     $needsCarrier = (bool)($needsCarrierSelect ?? false);
 
     $carrier_company_select = $carrier_company_select ?? '';
-    $thirdPartySelected     = ($carrier_company_select === '__third_party__');
-    $thirdPartyOptionLabel   = null;
-    if ($thirdPartySelected) {
-        $name = trim((string)($third_party_name ?? ''));
-        $plate = trim((string)($third_party_truck_plate ?? ''));
-        if ($name !== '' || $plate !== '') {
-            $thirdPartyOptionLabel = __('app.trip.edit.third_party') . ': ' . ($name ?: '—') . ' — ' . ($plate ?: '—');
-        }
-    }
+    $isNewExternalCarrier   = ($carrier_company_select === '__third_party_new__');
+    $selectedExternalFromDir = $carrier_company_id && ($externalCarriers ?? collect())->contains('id', $carrier_company_id);
+    $thirdPartySelected     = $isNewExternalCarrier || $selectedExternalFromDir;
 
     // keys
     $kExp  = 'expeditor_id';
@@ -89,7 +83,7 @@
     $kThirdTrailer = 'third_party_trailer_plate';
     $kThirdPrice   = 'third_party_price';
 
-    $thirdPartyNameWarn  = ($thirdPartySelected && $isBlank($third_party_name ?? null) && !$errors->has($kThirdName));
+    $thirdPartyNameWarn  = ($isNewExternalCarrier && $isBlank($third_party_name ?? null) && !$errors->has($kThirdName));
     $thirdPartyTruckWarn = ($thirdPartySelected && $isBlank($third_party_truck_plate ?? null) && !$errors->has($kThirdTruck));
     $thirdPartyPriceWarn = ($thirdPartySelected && $isBlank($third_party_price ?? null) && !$errors->has($kThirdPrice));
 
@@ -333,14 +327,22 @@
                                     'input-error' => ($errors->has($kCarrierSelect) || $errors->has($kCarrierId))
                                 ])
                             >
-                                <option value="">— выберите перевозчика —</option>
-                                <option value="__third_party__">➕ {{ $thirdPartyOptionLabel ?? __('app.trip.edit.third_party') }}</option>
-
-                                @foreach(($carrierCompanies ?? []) as $c)
-                                    <option value="{{ $c->id }}">
-                                        {{ $c->name }}@if(!empty($c->type)) — {{ $c->type }}@endif
-                                    </option>
-                                @endforeach
+                                <option value="">— {{ __('app.trip.edit.choose_carrier') ?? 'выберите перевозчика' }} —</option>
+                                <optgroup label="{{ __('app.carriers.our_carriers') ?? 'Наши перевозчики' }}">
+                                    @foreach(($carrierCompanies ?? []) as $c)
+                                        <option value="{{ $c->id }}">
+                                            {{ $c->name }}@if(!empty($c->type)) — {{ $c->type }}@endif
+                                        </option>
+                                    @endforeach
+                                </optgroup>
+                                @if(($externalCarriers ?? collect())->isNotEmpty())
+                                    <optgroup label="{{ __('app.carriers.external_from_directory') ?? 'Ārējie (no direktorijas)' }}">
+                                        @foreach($externalCarriers as $ext)
+                                            <option value="{{ $ext->id }}">{{ $ext->name }}{{ !empty($ext->country) ? ' · ' . $ext->country : '' }}</option>
+                                        @endforeach
+                                    </optgroup>
+                                @endif
+                                <option value="__third_party_new__">➕ {{ __('app.carriers.new_external') ?? 'Jauns ārējais pārvadātājs' }}</option>
                             </select>
 
                             @error('carrier_company_select')
@@ -406,29 +408,37 @@
                     </div>
                 </div>
 
-                {{-- THIRD PARTY --}}
+                {{-- THIRD PARTY (полная ширина строки, как во Fleet — поля нормального размера) --}}
                 @if($needsCarrier && $thirdPartySelected)
                     <div class="sm:col-span-3">
                         <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4 space-y-3">
-                            <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
-                                <div class="sm:col-span-5 min-w-0">
-                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">
-                                        Название третьей стороны {!! $reqBadge() !!}
-                                    </label>
-                                    <input
-                                        type="text"
-                                        wire:model.blur="third_party_name"
-                                        list="third-party-carriers-list-create"
-                                        placeholder="Напр. SIA New Carrier"
-                                        @class([$baseInput, $warnInput => $thirdPartyNameWarn, $errInput => $errors->has($kThirdName), 'input-error' => $errors->has($kThirdName)])
-                                    >
-                                    <datalist id="third-party-carriers-list-create">
-                                        @foreach(($thirdPartyCarriers ?? []) as $tp)
-                                            <option value="{{ $tp->name }}">{{ $tp->name }}</option>
-                                        @endforeach
-                                    </datalist>
-                                    @error('third_party_name') <div class="text-xs text-red-600 mt-1">❗ {{ $message }}</div> @enderror
+                            @if($selectedExternalFromDir)
+                                @php $selCarrier = ($externalCarriers ?? collect())->firstWhere('id', $carrier_company_id); @endphp
+                                <div class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    {{ __('app.carriers.title') ?? 'Перевозчик' }}: <span class="text-amber-700">{{ $selCarrier->name ?? '—' }}</span>
                                 </div>
+                            @endif
+                            <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                                @if($isNewExternalCarrier)
+                                    <div class="sm:col-span-5 min-w-0">
+                                        <label class="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">
+                                            {{ __('app.carriers.name') ?? 'Название третьей стороны' }} {!! $reqBadge() !!}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            wire:model.blur="third_party_name"
+                                            list="third-party-carriers-list-create"
+                                            placeholder="{{ __('app.carriers.create_hint') ?? 'Напр. SIA New Carrier' }}"
+                                            @class([$baseInput, $warnInput => $thirdPartyNameWarn, $errInput => $errors->has($kThirdName), 'input-error' => $errors->has($kThirdName)])
+                                        >
+                                        <datalist id="third-party-carriers-list-create">
+                                            @foreach(($externalCarriers ?? []) as $tp)
+                                                <option value="{{ $tp->name }}">{{ $tp->name }}</option>
+                                            @endforeach
+                                        </datalist>
+                                        @error('third_party_name') <div class="text-xs text-red-600 mt-1">❗ {{ $message }}</div> @enderror
+                                    </div>
+                                @endif
 
                                 <div class="sm:col-span-3 min-w-0">
                                     <label class="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">
@@ -469,7 +479,7 @@
                             </div>
 
                             <div class="text-[11px] text-gray-500 dark:text-gray-400">
-                                Внешний перевозчик: укажите название, номера тягача/прицепа и фрахт (EUR), который экспедитор оплатит третьей стороне.
+                                Внешний перевозчик: укажите название, номера тягача/прицепа и стоимость их услуг (EUR) по этому рейсу.
                             </div>
                         </div>
                     </div>

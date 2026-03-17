@@ -38,6 +38,9 @@ class EditTrip extends Component
     public bool $needsCarrierSelect = false;
     public $carrierCompanies = [];
 
+    /** External carriers from directory (type=carrier, is_third_party=1) */
+    public $externalCarriers = [];
+
     /** third-party carriers (for autocomplete) */
     public $thirdPartyCarriers = [];
 
@@ -47,7 +50,7 @@ class EditTrip extends Component
     public array $payers = [];
     public array $taxRates = [0, 5, 10, 21];
 
-    /** '' | numeric string | '__third_party__' */
+    /** '' | numeric string company id | '__third_party_new__' (create new in directory) */
     public string $carrier_company_select = '';
 
     /** ============================================================
@@ -159,6 +162,13 @@ class EditTrip extends Component
             ->whereIn('type', ['carrier', 'mixed', 'forwarder'])
             ->orderBy('name')
             ->get(['id', 'name', 'type']);
+
+        $this->externalCarriers = Company::query()
+            ->where('is_active', 1)
+            ->where('type', 'carrier')
+            ->where('is_third_party', true)
+            ->orderBy('name')
+            ->get(['id', 'name', 'country', 'reg_nr']);
 
         $this->thirdPartyCarriers = Company::query()
             ->where('is_active', 1)
@@ -358,7 +368,8 @@ class EditTrip extends Component
             && (($carrier?->is_third_party ?? false) || $this->trip->driver_id === null);
 
         if ($isThirdPartyTrip) {
-            $this->carrier_company_select = '__third_party__';
+            // Show existing third party carrier as selected from directory (by id)
+            $this->carrier_company_select = (string) $this->trip->carrier_company_id;
             $this->carrier_company_id = (int) $this->trip->carrier_company_id;
 
             $this->hydrateThirdPartyFromEntities($carrier);
@@ -456,21 +467,16 @@ class EditTrip extends Component
             return;
         }
 
-        if ($this->carrier_company_select === '__third_party__') {
+        if ($this->carrier_company_select === '__third_party_new__') {
             $this->carrier_company_id = null;
-
-            // third party => наша техника не нужна
             $this->driver_id = null;
             $this->truck_id  = null;
             $this->trailer_id = null;
             $this->selected_trailer_type_id = null;
             $this->cont_nr = null;
             $this->seal_nr = null;
-
-            // даты возьмём из steps
             $this->start_date = null;
             $this->end_date = null;
-
             return;
         }
 
@@ -482,7 +488,19 @@ class EditTrip extends Component
 
         if (ctype_digit($this->carrier_company_select)) {
             $this->carrier_company_id = (int) $this->carrier_company_select;
-            $this->resetThirdPartyState();
+            $company = Company::find($this->carrier_company_id);
+            if ($company && $company->is_third_party) {
+                $this->driver_id = null;
+                $this->truck_id = null;
+                $this->trailer_id = null;
+                $this->selected_trailer_type_id = null;
+                $this->cont_nr = null;
+                $this->seal_nr = null;
+                $this->start_date = null;
+                $this->end_date = null;
+            } else {
+                $this->resetThirdPartyState();
+            }
             return;
         }
 
@@ -1094,7 +1112,7 @@ class EditTrip extends Component
 
         // посредник sync carrier_company_id
         if ($this->needsCarrierSelect) {
-            if ($this->carrier_company_select === '__third_party__') {
+            if ($this->carrier_company_select === '__third_party_new__') {
                 $this->carrier_company_id = null;
             } elseif (ctype_digit((string) $this->carrier_company_select)) {
                 $this->carrier_company_id = (int) $this->carrier_company_select;
@@ -1103,7 +1121,10 @@ class EditTrip extends Component
             }
         }
 
-        $isThirdPartyFlow = $this->needsCarrierSelect && $this->carrier_company_select === '__third_party__';
+        $selectedExternalFromDirectory = $this->needsCarrierSelect && $this->carrier_company_id
+            && Company::find($this->carrier_company_id)?->is_third_party;
+        $isNewThirdParty = $this->needsCarrierSelect && $this->carrier_company_select === '__third_party_new__';
+        $isThirdPartyFlow = $isNewThirdParty || $selectedExternalFromDirectory;
 
         if ($isThirdPartyFlow) {
             $this->driver_id = null;
@@ -1133,7 +1154,7 @@ class EditTrip extends Component
                 ? 'required|integer|exists:companies,id'
                 : 'nullable|integer|exists:companies,id',
 
-            'third_party_name'        => $isThirdPartyFlow ? 'required|string|max:255' : 'nullable|string|max:255',
+            'third_party_name'        => $isNewThirdParty ? 'required|string|max:255' : 'nullable|string|max:255',
             'third_party_country'     => 'nullable|string|max:191',
             'third_party_reg_nr'      => 'nullable|string|max:191',
             'third_party_truck_plate' => $isThirdPartyFlow ? 'required|string|max:191' : 'nullable|string|max:191',
@@ -1292,14 +1313,20 @@ class EditTrip extends Component
             $thirdPartyCompany = null;
 
             if ($isThirdPartyFlow) {
-                $thirdPartyCompany = $this->ensureThirdPartyCarrierCompany();
-                $this->carrier_company_id = (int) $thirdPartyCompany->id;
+                if ($isNewThirdParty) {
+                    $thirdPartyCompany = $this->ensureThirdPartyCarrierCompany();
+                    $this->carrier_company_id = (int) $thirdPartyCompany->id;
+                } else {
+                    $thirdPartyCompany = Company::find($this->carrier_company_id);
+                }
 
-                $tpTruck = $this->ensureThirdPartyTruck($this->carrier_company_id);
-                $this->truck_id = (int) $tpTruck->id;
+                if ($thirdPartyCompany) {
+                    $tpTruck = $this->ensureThirdPartyTruck($thirdPartyCompany->id);
+                    $this->truck_id = (int) $tpTruck->id;
 
-                $tpTrailer = $this->ensureThirdPartyTrailer($this->carrier_company_id);
-                $this->trailer_id = $tpTrailer ? (int) $tpTrailer->id : null;
+                    $tpTrailer = $this->ensureThirdPartyTrailer($thirdPartyCompany->id);
+                    $this->trailer_id = $tpTrailer ? (int) $tpTrailer->id : null;
+                }
 
                 $this->autofillTripDatesFromSteps(true);
             }
@@ -1525,6 +1552,7 @@ class EditTrip extends Component
             'countries'          => config('countries', []),
             'expeditors'         => $expeditors,
             'carrierCompanies'   => $this->carrierCompanies,
+            'externalCarriers'   => $this->externalCarriers,
             'thirdPartyCarriers' => $this->thirdPartyCarriers,
             'needsCarrierSelect' => $this->needsCarrierSelect,
             'payers'             => $this->payers,

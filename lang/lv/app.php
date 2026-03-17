@@ -952,6 +952,9 @@ return [
 
     // Carriers (third-party)
     'carriers.title'         => 'Ārējie pārvadātāji',
+    'carriers.our_carriers'  => 'Mūsu pārvadātāji',
+    'carriers.external_from_directory' => 'Ārējie (no direktorijas)',
+    'carriers.new_external'  => 'Jauns ārējais pārvadātājs',
     'carriers.search'        => 'Meklēt pārvadātāju',
     'carriers.add'           => 'Pievienot pārvadātāju',
     'carriers.create_title'  => 'Pievienot ārējo pārvadātāju',

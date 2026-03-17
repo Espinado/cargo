@@ -415,6 +415,9 @@ return [
 
     // Carriers (third-party)
     'carriers.title'         => 'Внешние перевозчики',
+    'carriers.our_carriers'  => 'Наши перевозчики',
+    'carriers.external_from_directory' => 'Внешние (из справочника)',
+    'carriers.new_external'  => 'Новый внешний перевозчик',
     'carriers.search'        => 'Поиск перевозчика',
     'carriers.add'           => 'Добавить перевозчика',
     'carriers.create_title'  => 'Добавить внешнего перевозчика',
