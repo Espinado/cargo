@@ -48,4 +48,6 @@ return [
     'tile_attribution'    => env('MAPON_TILE_ATTRIBUTION', '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'),
     'tile_use_proxy'      => env('MAPON_TILE_USE_PROXY', true),
 
+    'map_provider' => env('MAP_PROVIDER', 'google'), // Google Maps JavaScript API
+
 ];

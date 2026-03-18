@@ -154,6 +154,130 @@
         </div>
     </div>
 
+    {{-- Карта позиции (Google Maps). Для отображения: MAP_PROVIDER=google и GOOGLE_MAPS_API_KEY в .env --}}
+    @if($maponLat !== null && $maponLng !== null)
+        @php
+            $mapProvider = config('mapon.map_provider', 'google');
+            $useGoogleTruck = ($mapProvider === 'google' && config('services.google.maps_api_key'));
+        @endphp
+        <div id="truck-map-coords-{{ $truck->id }}"
+             data-truck-id="{{ $truck->id }}"
+             data-lat="{{ $maponLat }}"
+             data-lng="{{ $maponLng }}"
+             data-tooltip="{{ e($maponMarkerTooltip) }}"
+             data-state="{{ $maponStateName ?? 'standing' }}"
+             @if($useGoogleTruck) data-google-key="{{ e(config('services.google.maps_api_key')) }}" @endif
+             class="hidden"
+             aria-hidden="true"></div>
+        <div id="truck-map-outer-{{ $truck->id }}" class="mt-6 w-full" wire:ignore>
+            <p class="text-sm text-gray-500 mb-2">{{ __('app.truck.show.mapon_map_title') }}</p>
+            <div id="truck-map-wrap-{{ $truck->id }}"
+                 class="rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-gray-50 block"
+                 style="position: relative; width: 100%; height: 320px; min-height: 320px; box-sizing: border-box;">
+                @if(!$useGoogleTruck)
+                    <p class="text-sm text-amber-700 px-4 py-8 text-center">{{ __('app.truck.show.mapon_configure_google') }}</p>
+                @endif
+            </div>
+        </div>
+        @if($useGoogleTruck)
+        <style>#truck-map-wrap-{{ $truck->id }} .truck-map-inner { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }</style>
+        @push('scripts')
+        <script>
+            (function() {
+                var truckId = {{ $truck->id }};
+                var coordsEl = document.getElementById('truck-map-coords-' + truckId);
+                var wrap = document.getElementById('truck-map-wrap-' + truckId);
+                if (!coordsEl || !wrap) return;
+                var lat = parseFloat(coordsEl.getAttribute('data-lat'));
+                var lng = parseFloat(coordsEl.getAttribute('data-lng'));
+                if (isNaN(lat) || isNaN(lng)) return;
+                var googleKey = (coordsEl.getAttribute('data-google-key') || '').trim();
+                if (!googleKey) return;
+                function initTruckGoogleMap() {
+                    wrap.style.height = '320px';
+                    wrap.style.minHeight = '320px';
+                    var inner = document.createElement('div');
+                    inner.setAttribute('style', 'position:absolute;top:0;left:0;width:100%;height:100%;');
+                    wrap.appendChild(inner);
+                    var center = { lat: lat, lng: lng };
+                    var map = new google.maps.Map(inner, {
+                        center: center,
+                        zoom: 15,
+                        mapTypeControl: true,
+                        streetViewControl: false,
+                        fullscreenControl: true,
+                        zoomControl: true
+                    });
+                    var marker = new google.maps.Marker({
+                        position: center,
+                        map: map,
+                        title: (coordsEl.getAttribute('data-tooltip') || '').trim()
+                    });
+                    window.__truckMaps = window.__truckMaps || {};
+                    window.__truckMaps[truckId] = { map: map, marker: marker };
+                    function doResize() {
+                        google.maps.event.trigger(map, 'resize');
+                        map.setCenter(center);
+                    }
+                    google.maps.event.addListenerOnce(map, 'idle', doResize);
+                    [100, 300, 600].forEach(function(ms) { setTimeout(doResize, ms); });
+                    if (typeof Livewire !== 'undefined' && Livewire.hook) {
+                        Livewire.hook('morph.updated', function() {
+                            var el = document.getElementById('truck-map-coords-' + truckId);
+                            var stored = window.__truckMaps && window.__truckMaps[truckId];
+                            if (!el || !stored) return;
+                            var newLat = parseFloat(el.getAttribute('data-lat'));
+                            var newLng = parseFloat(el.getAttribute('data-lng'));
+                            if (isNaN(newLat) || isNaN(newLng)) return;
+                            stored.marker.setPosition({ lat: newLat, lng: newLng });
+                            stored.map.panTo({ lat: newLat, lng: newLng });
+                        });
+                    }
+                    if (!window.__truckMapsCleanupRegistered) {
+                        window.__truckMapsCleanupRegistered = true;
+                        document.addEventListener('livewire:navigate', function destroyTruckMaps() {
+                            if (!window.__truckMaps) return;
+                            for (var id in window.__truckMaps) {
+                                try { window.__truckMaps[id].marker.setMap(null); } catch (e) {}
+                            }
+                            window.__truckMaps = {};
+                        });
+                    }
+                }
+                function runInit() {
+                    function tryInit() {
+                        if (wrap.offsetWidth >= 300 && wrap.offsetHeight >= 200) {
+                            initTruckGoogleMap();
+                            return;
+                        }
+                        if (typeof tryInit._n === 'undefined') tryInit._n = 0;
+                        tryInit._n++;
+                        if (tryInit._n < 40) setTimeout(tryInit, 50);
+                        else initTruckGoogleMap();
+                    }
+                    requestAnimationFrame(function() {
+                        requestAnimationFrame(function() { tryInit(); });
+                    });
+                }
+                if (window.google && window.google.maps) {
+                    runInit();
+                } else {
+                    var cb = '__truckMapGoogleCb_' + truckId;
+                    window[cb] = function() { delete window[cb]; runInit(); };
+                    var s = document.createElement('script');
+                    s.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(googleKey) + '&callback=' + cb;
+                    s.async = true;
+                    s.defer = true;
+                    document.head.appendChild(s);
+                }
+            })();
+        </script>
+        @endpush
+        @endif
+    @elseif($truck->mapon_unit_id && $maponError)
+        <p class="mt-3 text-sm text-amber-600">{{ __('app.truck.show.mapon_no_position') }}</p>
+    @endif
+
     <div wire:loading wire:target="refreshMaponData" class="mt-3 text-sm text-gray-500 animate-pulse">
         {{ __('app.truck.show.mapon_loading') }}
     </div>
