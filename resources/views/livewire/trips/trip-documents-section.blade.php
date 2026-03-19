@@ -99,7 +99,7 @@
 
                     {{-- EXPENSES --}}
                     @if(isset($types['expenses']))
-                        <optgroup label="💰 Izdevumi">
+                        <optgroup label="💰 {{ __('app.trip.show.optgroup_expenses') }}">
                             @foreach ($types['expenses'] as $enum)
                                 <option value="{{ $enum->value }}">{{ $enum->label() }}</option>
                             @endforeach
@@ -108,7 +108,7 @@
 
                     {{-- STEP --}}
                     @if(isset($types['step']))
-                        <optgroup label="🚛 Iekraušana / Izkraušana">
+                        <optgroup label="🚛 {{ __('app.trip.show.optgroup_loading') }}">
                             @foreach ($types['step'] as $enum)
                                 <option value="{{ $enum->value }}">{{ $enum->label() }}</option>
                             @endforeach
@@ -117,7 +117,7 @@
 
                     {{-- OTHER --}}
                     @if(isset($types['other']))
-                        <optgroup label="📦 Citi">
+                        <optgroup label="📦 {{ __('app.trip.show.optgroup_other') }}">
                             @foreach ($types['other'] as $enum)
                                 <option value="{{ $enum->value }}">{{ $enum->label() }}</option>
                             @endforeach
@@ -255,8 +255,8 @@
 
             @empty
                 <div class="rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/30 p-6 text-center">
-                    <div class="text-gray-600 dark:text-gray-300 font-medium">Nav dokumentu</div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Augšupielādē pirmo dokumentu augšā.</div>
+                    <div class="text-gray-600 dark:text-gray-300 font-medium">{{ __('app.trip.show.no_documents') }}</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('app.trip.show.documents_upload_first') }}</div>
                 </div>
             @endforelse
         </div>
@@ -314,7 +314,7 @@
                                     @else
                                         <a href="{{ $url }}" target="_blank"
                                            class="text-indigo-600 dark:text-indigo-400 hover:underline">
-                                            Atvērt
+                                            {{ __('app.trip.show.open') }}
                                         </a>
                                     @endif
                                 @else
@@ -327,7 +327,7 @@
                     @empty
                         <tr>
                             <td colspan="5" class="px-3 py-3 text-center text-gray-500 dark:text-gray-400">
-                                Nav dokumentu
+                                {{ __('app.trip.show.no_documents') }}
                             </td>
                         </tr>
                     @endforelse

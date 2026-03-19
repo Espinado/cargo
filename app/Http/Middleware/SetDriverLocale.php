@@ -12,12 +12,12 @@ class SetDriverLocale
      * Handle an incoming request.
      *
      * Авто-выбор языка для DriverApp:
-     * - пытаемся определить по Accept-Language (ru, lv)
+     * - пытаемся определить по Accept-Language (lv, ru, hu)
      * - по умолчанию — lv
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $supported = ['lv', 'ru'];
+        $supported = ['lv', 'ru', 'hu'];
 
         $locale = $request->getPreferredLanguage($supported) ?: 'lv';
 

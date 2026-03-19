@@ -143,7 +143,7 @@
                         'bg-purple-200 text-purple-800'  => $stepStatus === $TS::PROCESSING,
                         'bg-green-200 text-green-700'    => $stepStatus === $TS::COMPLETED,
                     ])>
-                        {{ $stepStatus?->label() ?? 'Nav uzsākts' }}
+                        {{ $stepStatus?->label() ?? __('app.enums.trip_step_status.not_started') }}
                     </span>
 
                     <span class="text-xs text-gray-400" x-text="open ? '▲' : '▼'"></span>
@@ -199,7 +199,7 @@
                             'bg-purple-100 text-purple-700' => $stepStatus === $TS::PROCESSING,
                             'bg-green-100 text-green-700'   => $stepStatus === $TS::COMPLETED,
                         ])>
-                            {{ $stepStatus?->label() ?? 'Nav uzsākts' }}
+                            {{ $stepStatus?->label() ?? __('app.enums.trip_step_status.not_started') }}
                         </span>
                     </div>
 

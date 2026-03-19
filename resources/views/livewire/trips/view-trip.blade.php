@@ -502,7 +502,11 @@
                                 @if(!empty($routeSuggestedOrderLabels))
                                     <div>
                                         <p class="text-[11px] text-gray-500 dark:text-gray-400 mb-1">{{ __('app.trip.show.route_optimal_suggested_order') }}</p>
-                                        <p class="text-base text-gray-700 dark:text-gray-300 break-words leading-relaxed">{{ implode(' → ', array_map('e', $routeSuggestedOrderLabels)) }}</p>
+                                        <div class="text-base text-gray-700 dark:text-gray-300 break-words leading-relaxed space-y-0.5">
+                                            @foreach($routeSuggestedOrderLabels as $num => $label)
+                                                <div>{{ $num + 1 }}) {{ $label }}</div>
+                                            @endforeach
+                                        </div>
                                     </div>
                                 @endif
                             </div>

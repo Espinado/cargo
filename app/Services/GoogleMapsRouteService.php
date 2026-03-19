@@ -250,11 +250,13 @@ class GoogleMapsRouteService
     }
 
     /**
-     * Suggest optimal order (nearest-neighbor TSP) and return summary for that order.
+     * Suggest optimal order (nearest-neighbor TSP) respecting cargo constraints:
+     * for each cargo, loading step(s) must come before unloading step(s). Supports consolidated trips.
      * Returns: ['distance_km', 'duration_minutes', 'suggested_order_indices', 'suggested_steps'] or error.
      */
     public function getOptimalRouteFromSteps(Collection $steps): array
     {
+        $steps->load('cargos');
         $result = $this->getCoordinatesAndStepsFromSteps($steps);
         if (!empty($result['error'])) {
             return $result;
@@ -262,7 +264,8 @@ class GoogleMapsRouteService
 
         $coordinates = $result['coordinates'];
         $stepsArray = $result['steps'];
-        $indices = RouteOptimizer::suggestOrder($coordinates, true);
+        $precedence = RouteOptimizer::buildPrecedenceFromSteps($stepsArray);
+        $indices = RouteOptimizer::suggestOrderConstrained($coordinates, $precedence, true);
         $reorderedCoords = RouteOptimizer::reorderByIndices($coordinates, $indices);
         $reorderedSteps = RouteOptimizer::reorderByIndices($stepsArray, $indices);
 

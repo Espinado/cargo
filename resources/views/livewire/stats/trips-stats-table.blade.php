@@ -25,7 +25,7 @@
             {{-- Rows badge (desktop) --}}
             <div class="hidden sm:flex text-sm text-gray-600 items-center">
                 <span class="px-3 py-2 rounded-xl bg-gray-200/60">
-                    Rindu skaits: {{ $rows->total() }}
+                    {{ __('app.stats.rows') }}: {{ $rows->total() }}
                 </span>
             </div>
         </div>
@@ -36,7 +36,7 @@
                 <input
                     type="text"
                     wire:model.live.debounce.400ms="search"
-                    placeholder="Meklēt: reisa ID, vadītājs, numurzīme..."
+                    placeholder="{{ __('app.stats.search') }}"
                     class="w-full px-3 py-2.5 rounded-xl border border-gray-300 bg-white text-gray-900
                            focus:outline-none focus:ring-2 focus:ring-blue-200"
                 />
@@ -250,7 +250,7 @@
                                     {{ number_format($freight, 2, '.', ' ') }}
                                     <span class="text-xs text-gray-500">{{ $cur }}</span>
                                 </div>
-                                <div class="text-xs text-gray-500">Kravas pārvadājums (Σ)</div>
+                                <div class="text-xs text-gray-500">{{ __('app.stats.freight_total') }}</div>
                             </div>
                         </div>
 
@@ -284,7 +284,7 @@
                         {{-- Money row --}}
                         <div class="mt-3 grid grid-cols-3 gap-2">
                             <div class="rounded-xl border border-gray-200 p-3">
-                                <div class="text-xs text-gray-500 mb-1">Izdevumi (Σ)</div>
+                                <div class="text-xs text-gray-500 mb-1">{{ __('app.stats.expenses_total') }}</div>
                                 <div class="font-semibold text-gray-900">
                                     {{ number_format($expenses, 2, '.', ' ') }}
                                     <span class="text-xs text-gray-500">{{ $cur }}</span>
@@ -292,7 +292,7 @@
                             </div>
 
                             <div class="rounded-xl border border-gray-200 p-3">
-                                <div class="text-xs text-gray-500 mb-1">Peļņa</div>
+                                <div class="text-xs text-gray-500 mb-1">{{ __('app.stats.profit') }}</div>
                                 <div class="font-semibold {{ $profit < 0 ? 'text-red-600' : 'text-green-600' }}">
                                     {{ number_format($profit, 2, '.', ' ') }}
                                     <span class="text-xs text-gray-500">{{ $cur }}</span>
@@ -300,7 +300,7 @@
                             </div>
 
                             <div class="rounded-xl border border-gray-200 p-3">
-                                <div class="text-xs text-gray-500 mb-1">Marža</div>
+                                <div class="text-xs text-gray-500 mb-1">{{ __('app.stats.margin') }}</div>
                                 @php
                                     $margin = $freight > 0 ? ($profit / $freight) * 100 : null;
                                 @endphp
@@ -317,7 +317,7 @@
                         {{-- Odometer row --}}
                         <div class="mt-3 grid grid-cols-2 gap-2">
                             <div class="rounded-xl border border-gray-200 p-3">
-                                <div class="text-xs text-gray-500 mb-1">Izbraukšana</div>
+                                <div class="text-xs text-gray-500 mb-1">{{ __('app.stats.departure') }}</div>
                                 @if($trip->started_at)
                                     <div class="font-semibold text-gray-900">
                                         {{ $trip->started_at->format('d.m.Y H:i') }}
@@ -337,7 +337,7 @@
                             </div>
 
                             <div class="rounded-xl border border-gray-200 p-3">
-                                <div class="text-xs text-gray-500 mb-1">Atgriešanās</div>
+                                <div class="text-xs text-gray-500 mb-1">{{ __('app.stats.return') }}</div>
                                 @if($trip->ended_at)
                                     <div class="font-semibold text-gray-900">
                                         {{ $trip->ended_at->format('d.m.Y H:i') }}
@@ -360,11 +360,11 @@
                         <div class="mt-3 flex gap-2">
                             <button wire:click="sortBy('departure_at')"
                                     class="flex-1 px-3 py-2 rounded-xl text-sm bg-gray-100 border border-gray-200">
-                                ⇅ Izbraukšana
+                                ⇅ {{ __('app.stats.departure') }}
                             </button>
                             <button wire:click="sortBy('freight_total')"
                                     class="flex-1 px-3 py-2 rounded-xl text-sm bg-gray-100 border border-gray-200">
-                                ⇅ Kravas pārvadājums
+                                ⇅ {{ __('app.stats.chart_freight') }}
                             </button>
                         </div>
 
@@ -372,7 +372,7 @@
                 </div>
             @empty
                 <div class="bg-white rounded-2xl shadow border border-gray-200 p-8 text-center text-gray-500">
-                    Nav datu
+                    {{ __('app.stats.no_data') }}
                 </div>
             @endforelse
 
@@ -390,39 +390,39 @@
                             <tr>
                                 <th class="px-4 py-3 text-left whitespace-nowrap">
                                     <button wire:click="sortBy('id')" class="font-semibold hover:underline">
-                                        # Reiss
+                                        # {{ __('app.stats.trip_column') }}
                                     </button>
                                 </th>
 
-                                <th class="px-4 py-3 text-left whitespace-nowrap">Mašīna / Vadītājs</th>
+                                <th class="px-4 py-3 text-left whitespace-nowrap">{{ __('app.stats.truck_driver') }}</th>
 
                                 <th class="px-4 py-3 text-left whitespace-nowrap">
                                     <button wire:click="sortBy('departure_at')" class="font-semibold hover:underline">
-                                        Izbraukšana no garāžas
+                                        {{ __('app.stats.departure_garage') }}
                                     </button>
                                 </th>
 
                                 <th class="px-4 py-3 text-left whitespace-nowrap">
                                     <button wire:click="sortBy('return_at')" class="font-semibold hover:underline">
-                                        Atgriešanās garāžā
+                                        {{ __('app.stats.return_garage') }}
                                     </button>
                                 </th>
 
                                 <th class="px-4 py-3 text-right whitespace-nowrap">
                                     <button wire:click="sortBy('freight_total')" class="font-semibold hover:underline">
-                                        Kravas pārvadājums (Σ)
+                                        {{ __('app.stats.freight_total') }}
                                     </button>
                                 </th>
 
                                 <th class="px-4 py-3 text-right whitespace-nowrap">
                                     <button wire:click="sortBy('expenses_total')" class="font-semibold hover:underline">
-                                        Izdevumi (Σ)
+                                        {{ __('app.stats.expenses_total') }}
                                     </button>
                                 </th>
 
                                 <th class="px-4 py-3 text-right whitespace-nowrap">
                                     <button wire:click="sortBy('profit')" class="font-semibold hover:underline">
-                                        Peļņa / Zaudējumi
+                                        {{ __('app.stats.profit_loss') }}
                                     </button>
                                 </th>
                             </tr>
@@ -536,7 +536,7 @@
                             @empty
                                 <tr>
                                     <td colspan="7" class="px-4 py-8 text-center text-gray-500">
-                                        Nav datu
+                                        {{ __('app.stats.no_data') }}
                                     </td>
                                 </tr>
                             @endforelse
@@ -581,7 +581,7 @@
                     <button
                         wire:click="resetFilters"
                         class="px-4 py-3 rounded-xl bg-gray-100 border border-gray-200 text-gray-800 font-semibold"
-                        title="Notīrīt"
+                        title="{{ __('app.stats.filters_reset') }}"
                     >
                         ♻️
                     </button>
@@ -597,8 +597,8 @@
                 x-on:click="window.scrollTo({ top: 0, behavior: 'smooth' })"
                 class="w-12 h-12 rounded-2xl bg-white/95 border border-gray-200 shadow-lg
                        flex items-center justify-center text-lg active:scale-[0.98]"
-                aria-label="Uz augšu"
-                title="Uz augšu"
+                aria-label="{{ __('app.stats.scroll_top') }}"
+                title="{{ __('app.stats.scroll_top') }}"
             >
                 ↑
             </button>
@@ -634,14 +634,14 @@
                         <input
                             type="text"
                             wire:model.live.debounce.400ms="search"
-                            placeholder="Meklēt: reisa ID, vadītājs, numurzīme..."
+                            placeholder="{{ __('app.stats.search') }}"
                             class="w-full px-3 py-3 rounded-xl border border-gray-300 bg-white text-gray-900
                                    focus:outline-none focus:ring-2 focus:ring-blue-200"
                         />
 
                         <div class="grid grid-cols-2 gap-2">
                             <div>
-                                <div class="text-xs text-gray-500 mb-1">Datums no</div>
+                                <div class="text-xs text-gray-500 mb-1">{{ __('app.stats.date_from') }}</div>
                                 <input
                                     type="date"
                                     wire:model.live="dateFrom"
@@ -650,7 +650,7 @@
                                 />
                             </div>
                             <div>
-                                <div class="text-xs text-gray-500 mb-1">Datums līdz</div>
+                                <div class="text-xs text-gray-500 mb-1">{{ __('app.stats.date_to') }}</div>
                                 <input
                                     type="date"
                                     wire:model.live="dateTo"
@@ -672,19 +672,19 @@
                                 wire:click="resetFilters"
                                 class="flex-1 px-3 py-3 rounded-xl bg-gray-100 border border-gray-200 font-semibold"
                             >
-                                Notīrīt
+                                {{ __('app.stats.filters_reset') }}
                             </button>
 
                             <button
                                 class="flex-1 px-3 py-3 rounded-xl bg-blue-600 text-white font-semibold"
                                 x-on:click="open = false"
                             >
-                                Piemērot
+                                {{ __('app.stats.filters_apply') }}
                             </button>
                         </div>
 
                         <div class="text-xs text-gray-500 text-center pt-1">
-                            Rindu skaits: {{ $rows->total() }}
+                            {{ __('app.stats.rows') }}: {{ $rows->total() }}
                         </div>
                     </div>
                 </div>
@@ -730,8 +730,8 @@
                 data: {
                     labels: data.labels,
                     datasets: [
-                        { label: data.label_freight || 'Frakts (EUR)', data: data.freight, backgroundColor: 'rgba(59, 130, 246, 0.7)', borderColor: 'rgb(59, 130, 246)', borderWidth: 1 },
-                        { label: data.label_profit || 'Peļņa (EUR)', data: data.profit, backgroundColor: 'rgba(34, 197, 94, 0.7)', borderColor: 'rgb(34, 197, 94)', borderWidth: 1 }
+                        { label: data.label_freight || @json(__('app.stats.chart_freight')), data: data.freight, backgroundColor: 'rgba(59, 130, 246, 0.7)', borderColor: 'rgb(59, 130, 246)', borderWidth: 1 },
+                        { label: data.label_profit || @json(__('app.stats.chart_profit')), data: data.profit, backgroundColor: 'rgba(34, 197, 94, 0.7)', borderColor: 'rgb(34, 197, 94)', borderWidth: 1 }
                     ]
                 },
                 options: {

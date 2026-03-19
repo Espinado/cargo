@@ -41,6 +41,8 @@ return [
     // Stats general
     'stats.date_from'          => 'Дата с',
     'stats.date_to'            => 'Дата по',
+    'stats.scroll_top'         => 'Вверх',
+
     // Stats / By clients
     'stats.clients.title'         => 'Статистика по клиентам',
     'stats.clients.subtitle'     => 'Фрахт и количество рейсов по заказчику',
@@ -186,6 +188,14 @@ return [
     'trip.show.toast_deleted' => 'Удалено',
     'trip.show.toast_error'   => 'Ошибка!',
     'trip.show.step_column'   => 'Шаг',
+    'trip.show.no_documents'       => 'Нет документов',
+    'trip.show.documents_upload_first' => 'Загрузите первый документ выше.',
+    'trip.show.optgroup_expenses'  => 'Расходы',
+    'trip.show.optgroup_loading'  => 'Погрузка / Разгрузка',
+    'trip.show.optgroup_other'    => 'Прочее',
+    'trip.expenses.search_placeholder' => 'Поиск по описанию, категории...',
+    'trip.expenses.clear_hint'     => 'Подсказка: «Сбросить» очищает поиск. Сортировка сохраняется (в десктопе).',
+    'trip.expenses.add_first_hint' => 'Добавьте первый расход выше.',
     'trip.show.route_calc_title'  => 'Расчёт маршрута',
     'trip.show.route_calc_optimal_hint' => 'По текущему порядку точек. Можно получить рекомендацию кратчайшего маршрута.',
     'trip.show.route_optimal_btn'  => 'Предложить кратчайший маршрут',

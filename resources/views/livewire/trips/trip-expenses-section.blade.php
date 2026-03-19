@@ -6,7 +6,7 @@
     <div class="flex items-start justify-between gap-3">
         <div>
             <h2 class="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-                💶 Izdevumi par reisu
+                💶 {{ __('app.trip.show.expenses_trip') }}
             </h2>
             <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 ID: {{ $trip->id }}
@@ -159,7 +159,7 @@
             <div class="relative">
                 <input type="text"
                        wire:model.live="search"
-                       placeholder="🔍 Meklēt aprakstā, kategorijā..."
+                       placeholder="🔍 {{ __('app.trip.expenses.search_placeholder') }}"
                        class="w-full border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800
                               rounded-xl px-3 py-3 pr-10 text-sm text-gray-800 dark:text-gray-100">
 
@@ -191,14 +191,14 @@
                             @click="$wire.set('search','')"
                             class="w-full rounded-xl px-3 py-3 text-sm font-semibold
                                    bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 active:scale-[0.98]">
-                        Notīrīt
+                        {{ __('app.stats.filters_reset') }}
                     </button>
                 </div>
             </div>
 
             <div class="text-xs text-gray-500 dark:text-gray-400">
-                Padoms: “Notīrīt” iztīra meklēšanu. Kārtošana paliek (galdiņā uz datora).
-            </div>
+                {{ __('app.trip.expenses.clear_hint') }}
+                {{-- “Notīrīt” </div>
         </div>
     </div>
 
@@ -209,7 +209,7 @@
         <div class="relative w-64">
             <input type="text"
                    wire:model.live="search"
-                   placeholder="🔍 Meklēt aprakstā, kategorijā..."
+                   placeholder="🔍 {{ __('app.trip.expenses.search_placeholder') }}"
                    class="w-full border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-xl px-3 py-2 pr-9 text-sm">
 
             @if($search)
@@ -359,8 +359,8 @@
 
             @empty
                 <div class="rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/30 p-6 text-center">
-                    <div class="text-gray-600 dark:text-gray-300 font-medium">Nav izdevumu</div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Pievieno pirmo izdevumu augšā.</div>
+                    <div class="text-gray-600 dark:text-gray-300 font-medium">{{ __('app.stats.events.no_expenses') }}</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('app.trip.expenses.add_first_hint') }}</div>
                 </div>
             @endforelse
         </div>
@@ -505,7 +505,7 @@
                                                 <img src="{{ $url }}" class="w-12 h-12 rounded-lg object-cover border dark:border-gray-700" alt="Expense file">
                                             </a>
                                         @else
-                                            <a href="{{ $url }}" target="_blank" rel="noopener" class="text-indigo-600 dark:text-indigo-300 underline">Atvērt</a>
+                                            <a href="{{ $url }}" target="_blank" rel="noopener" class="text-indigo-600 dark:text-indigo-300 underline">{{ __('app.trip.show.open') }}</a>
                                         @endif
                                     @else
                                         <span class="text-gray-400">—</span>
@@ -517,7 +517,7 @@
                             <tr>
                                 <td colspan="5"
                                     class="px-3 py-3 text-center text-gray-500 dark:text-gray-400">
-                                    Nav izdevumu
+                                    {{ __('app.stats.events.no_expenses') }}
                                 </td>
                             </tr>
                         @endforelse

@@ -136,7 +136,7 @@
             @empty
                 <tr>
                     <td colspan="4" class="px-3 py-3 text-center text-gray-500">
-                        Nav dokumentu
+                        {{ __('app.trip.show.no_documents') }}
                     </td>
                 </tr>
             @endforelse

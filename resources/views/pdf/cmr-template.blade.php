@@ -1,6 +1,6 @@
 {{-- resources/views/pdf/cmr-template.blade.php --}}
 <!DOCTYPE html>
-<html lang="lv">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <title>CMR</title>
@@ -174,7 +174,7 @@
                         <td class="h1">
                             <div>
                                 <span class="num">1</span>
-                                <span class="lbl">Nosūtītājs (nosaukums, adrese, valsts)
+                                <span class="lbl">Expéditeur (nom, adresse, pays)
                                     <span class="sub">Absender (Name, Anschrift, Land)</span>
                                 </span>
                             </div>
@@ -195,7 +195,7 @@
                         <td class="h2">
                             <div>
                                 <span class="num">2</span>
-                                <span class="lbl">Saņēmējs (nosaukums, adrese, valsts)
+                                <span class="lbl">Destinataire (nom, adresse, pays)
                                     <span class="sub">Empfänger (Name, Anschrift, Land)</span>
                                 </span>
                             </div>
@@ -216,7 +216,7 @@
                         <td class="h3">
                             <div>
                                 <span class="num">3</span>
-                                <span class="lbl">Kravas izkraušanas vieta
+                                <span class="lbl">Lieu de livraison
                                     <span class="sub">Auslieferungsort des Gutes</span>
                                 </span>
                             </div>
@@ -235,7 +235,7 @@
                         <td class="h4">
                             <div>
                                 <span class="num">4</span>
-                                <span class="lbl">Kravas iekraušanas vieta un datums
+                                <span class="lbl">Lieu et date de prise en charge de la marchandise
                                     <span class="sub">Ort und Tag der Übernahme des Gutes</span>
                                 </span>
                             </div>
@@ -256,7 +256,7 @@
                         <td class="h5">
                             <div>
                                 <span class="num">5</span>
-                                <span class="lbl">Pievienotie dokumenti
+                                <span class="lbl">Documents joints
                                     <span class="sub">Beigefügte dokumente</span>
                                 </span>
                             </div>
@@ -279,10 +279,10 @@
                     <tr>
                         <td class="htitle">
                             <div class="title">
-                                STARPTAUTISKĀ PREČU-TRANSPORTA PAVADZĪME<br>
+                                LETTRE DE VOITURE<br>
                                 INTERNATIONAL CONSIGNMENT NOTE
                             </div>
-                            <div class="tiny">Šis pārvadājums ir veicams saskaņā ar CMR konvenciju.</div>
+                            <div class="tiny">Ce transport est soumis à la Convention CMR.</div>
                         </td>
                     </tr>
 
@@ -290,7 +290,7 @@
                         <td class="h16">
                             <div>
                                 <span class="num">16</span>
-                                <span class="lbl">Pārvadātājs/ekspeditors (nosaukums, adrese, valsts)
+                                <span class="lbl">Transporteur (nom, adresse, pays)
                                     <span class="sub">Frachtführer (Name, Anschrift, Land)</span>
                                 </span>
                             </div>
@@ -311,7 +311,7 @@
                         <td class="h17">
                             <div>
                                 <span class="num">17</span>
-                                <span class="lbl">Turpmākais pārvadātājs (nosaukums, adrese, valsts)
+                                <span class="lbl">Transporteur successif (nom, adresse, pays)
                                     <span class="sub">Nachfolgende Frachtführer (Name, Anschrift, Land)</span>
                                 </span>
                             </div>
@@ -323,7 +323,7 @@
                         <td class="h18">
                             <div>
                                 <span class="num">18</span>
-                                <span class="lbl">Pārvadātāja aizrādījumi un piezīmes
+                                <span class="lbl">Réserves et observations du transporteur
                                     <span class="sub">Vorbehalte und Bemerkungen des Frachtführer</span>
                                 </span>
                             </div>
@@ -341,25 +341,25 @@
                 <table>
                     <tr class="center">
                         <td class="h611_head pad-s" style="width:12%;">
-                            <span class="num">6</span><div class="lbl">Zīmes un numuri</div>
+                            <span class="num">6</span><div class="lbl">Marques et numéros</div>
                         </td>
                         <td class="h611_head pad-s" style="width:8%;">
-                            <span class="num">7</span><div class="lbl">Vietu skaits</div>
+                            <span class="num">7</span><div class="lbl">Nombre de colis</div>
                         </td>
                         <td class="h611_head pad-s" style="width:10%;">
-                            <span class="num">8</span><div class="lbl">Iepakojums</div>
+                            <span class="num">8</span><div class="lbl">Mode d'emballage</div>
                         </td>
                         <td class="h611_head pad-s" style="width:30%;">
-                            <span class="num">9</span><div class="lbl">Kravas nosaukums</div>
+                            <span class="num">9</span><div class="lbl">Nature de la marchandise</div>
                         </td>
                         <td class="h611_head pad-s" style="width:12%;">
                             <span class="num">10</span><div class="lbl">Statist Nr.</div>
                         </td>
                         <td class="h611_head pad-s" style="width:14%;">
-                            <span class="num">11</span><div class="lbl">Bruto svars, kg</div>
+                            <span class="num">11</span><div class="lbl">Poids brut (kg)</div>
                         </td>
                         <td class="h611_head pad-s" style="width:14%;">
-                            <span class="num">12</span><div class="lbl">Tilpums m³</div>
+                            <span class="num">12</span><div class="lbl">Volume (m³)</div>
                         </td>
                     </tr>
 
@@ -439,7 +439,7 @@
 
                     <tr>
                         <td colspan="5" class="h611_adr pad-s mini">
-                            Klase / Klasse &nbsp;&nbsp; Cipars / Ziffer &nbsp;&nbsp; Burts / Buchstabe &nbsp;&nbsp; ADR
+                            Classe / Klasse &nbsp;&nbsp; N° / Ziffer &nbsp;&nbsp; Lettre / Buchstabe &nbsp;&nbsp; ADR
                         </td>
                         <td colspan="2" class="h611_adr pad-s"></td>
                     </tr>
@@ -453,11 +453,11 @@
                 <table>
                     <tr>
                         <td class="h13_19">
-                            <div><span class="num">13</span><span class="lbl">Nosūtītāja norādījumi (muitas u.c. formalitātes)
+                            <div><span class="num">13</span><span class="lbl">Instructions de l'expéditeur (douane et autres formalités)
                                 <span class="sub">Absenders (Zoll und sonstige amtliche Behandlung)</span></span></div>
                             <div class="lines"><div class="line"></div><div class="line"></div><div class="line"></div></div>
                             <div class="mini" style="margin-top:2mm;">
-                                Norādīta kravas vērtība
+                                Indication de la valeur de la marchandise
                                 <span style="float:right;">Angabe des Wertes des Gutes</span>
                             </div>
                         </td>
@@ -472,14 +472,14 @@
                             <table>
                                 <tr>
                                     <td style="width:22%;" class="pad-s"><span class="num">19</span></td>
-                                    <td style="width:39%;" class="pad-s lbl center">Sūtītājs</td>
-                                    <td style="width:39%;" class="pad-s lbl center">Valūta</td>
+                                    <td style="width:39%;" class="pad-s lbl center">Expéditeur</td>
+                                    <td style="width:39%;" class="pad-s lbl center">Devise</td>
                                 </tr>
-                                <tr><td colspan="3" class="pad-s mini">Likme / Fracht</td></tr>
-                                <tr><td colspan="3" class="pad-s mini">Starppība / Zwischensumme</td></tr>
-                                <tr><td colspan="3" class="pad-s mini">Papildu iekasējumi</td></tr>
-                                <tr><td colspan="3" class="pad-s mini">Citi / Sonstiges</td></tr>
-                                <tr><td colspan="3" class="pad-s mini">Kopā</td></tr>
+                                <tr><td colspan="3" class="pad-s mini">Fracht / Fracht</td></tr>
+                                <tr><td colspan="3" class="pad-s mini">Zwischensumme</td></tr>
+                                <tr><td colspan="3" class="pad-s mini">Frais supplémentaires</td></tr>
+                                <tr><td colspan="3" class="pad-s mini">Autres / Sonstiges</td></tr>
+                                <tr><td colspan="3" class="pad-s mini">Total</td></tr>
                             </table>
                         </td>
                     </tr>
@@ -494,8 +494,8 @@
 
         {{-- 15 + 20 --}}
         <tr>
-            <td class="h15_20"><span class="num">15</span> <span class="lbl">Apmaksas noteikumi</span></td>
-            <td class="h15_20"><span class="num">20</span> <span class="lbl">Īpaši saskaņoti noteikumi</span></td>
+            <td class="h15_20"><span class="num">15</span> <span class="lbl">Conditions de paiement</span></td>
+            <td class="h15_20"><span class="num">20</span> <span class="lbl">Règlements particuliers convenus</span></td>
         </tr>
 
         {{-- 21–24 --}}
@@ -505,9 +505,9 @@
                     <tr>
                         <td style="width:57.8947%;" class="h21_24">
                             <div class="lbl">
-                                <span class="num">21</span> Sastādīts
-                                <span style="margin-left:10mm;">Vieta</span>
-                                <span style="margin-left:18mm;">Datums</span>
+                                <span class="num">21</span> Fait à
+                                <span style="margin-left:10mm;">Lieu</span>
+                                <span style="margin-left:18mm;">Date</span>
                             </div>
 
                             {{-- ✅ центрируем оба значения, сжатые отступы для одной страницы --}}
@@ -523,28 +523,28 @@
                             </div>
 
                             <div style="margin-top:1.2mm;" class="lbl">
-                                <span class="num">22</span> Ierašanās iekraušanai
-                                <span class="sub">Ankunft für einladung</span>
-                                <div style="margin-top:0.8mm;" class="lbl">Aizbraukšana <span class="sub">Abfahrt</span></div>
-                                <div style="margin-top:0.8mm;" class="lbl">Nosūtītāja paraksts un zīmogs
+                                <span class="num">22</span> Arrivée pour chargement
+                                <span class="sub">Ankunft für Beladung</span>
+                                <div style="margin-top:0.8mm;" class="lbl">Départ <span class="sub">Abfahrt</span></div>
+                                <div style="margin-top:0.8mm;" class="lbl">Signature et cachet de l'expéditeur
                                     <span class="sub">Unterschrift und Stempel des Absender</span>
                                 </div>
                             </div>
                         </td>
 
                         <td style="width:28.9474%;" class="h21_24">
-                            <div class="lbl"><span class="num">23</span> Ceļazīmes Nr. ____________________</div>
-                            <div style="margin-top:3mm;" class="lbl">Vadītāja uzvārdi __________________</div>
+                            <div class="lbl"><span class="num">23</span> N° lettre de voiture ____________________</div>
+                            <div style="margin-top:3mm;" class="lbl">Nom du conducteur __________________</div>
                         </td>
 
                         <td style="width:13.1579%;" class="h21_24 no-pad">
                             <table>
-                                <tr><td class="pad-s"><div class="lbl"><span class="num">24</span> Krava saņemta</div><div class="mini right">am</div></td></tr>
-                                <tr><td class="pad-s mini">Ierašanās izkraušanai</td></tr>
+                                <tr><td class="pad-s"><div class="lbl"><span class="num">24</span> Réception de la marchandise</div><div class="mini right">am</div></td></tr>
+                                <tr><td class="pad-s mini">Arrivée pour déchargement</td></tr>
                                 <tr><td class="pad-s mini">Ankunft für Ausladung</td></tr>
-                                <tr><td class="pad-s mini">Aizbraukšana</td></tr>
+                                <tr><td class="pad-s mini">Départ</td></tr>
                                 <tr><td class="pad-s mini">Abfahrt</td></tr>
-                                <tr><td class="pad-s mini right">Saņēmu</td></tr>
+                                <tr><td class="pad-s mini right">Reçu par</td></tr>
                             </table>
                         </td>
                     </tr>
@@ -558,7 +558,7 @@
                 <table>
                     <tr>
                         <td style="width:57.8947%;" class="h25_26">
-                            <div class="lbl"><span class="num">25</span> Reģistrācijas Nr. / Amtl. Kennzeichen</div>
+                            <div class="lbl"><span class="num">25</span> Immatriculation / Amtl. Kennzeichen</div>
                             <div style="margin-top:2mm; font-size:9px;">
                                 {{ $trip?->truck?->plate ?? '' }}
                                 @if(!empty($trip?->trailer?->plate))
@@ -568,7 +568,7 @@
                             <div class="lines"><div class="line"></div></div>
                         </td>
                         <td style="width:42.1053%;" class="h25_26">
-                            <div class="lbl"><span class="num">26</span> Marka / Typ &nbsp;&nbsp;&nbsp; Puspiekabe / Auflieger</div>
+                            <div class="lbl"><span class="num">26</span> Marque et type &nbsp;&nbsp;&nbsp; Remorque / Auflieger</div>
                             <div class="lines"><div class="line"></div><div class="line"></div></div>
                         </td>
                     </tr>
