@@ -131,25 +131,24 @@
                 <div class="mt-4 pt-4 border-t border-gray-100">
                     <p class="text-xs text-gray-500 mb-2">{{ __('app.orders.route_calc.title') }}</p>
                     <p class="text-xs text-gray-500 mb-2">{{ __('app.orders.route_calc.vehicle_type') }}</p>
-                    <div class="flex flex-wrap items-center gap-3">
+                    <div class="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2">
                         <button type="button" wire:click="calculateRouteDistance"
                                 wire:loading.attr="disabled"
-                                class="shrink-0 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 min-h-[44px] touch-manipulation disabled:opacity-50 min-w-[10rem]">
+                                class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-semibold shadow-sm hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 min-h-[44px] touch-manipulation disabled:opacity-50 transition-colors w-full sm:w-auto sm:min-w-[18rem]">
                             <span wire:loading.remove wire:target="calculateRouteDistance">📏 {{ __('app.orders.route_calc.btn') }}</span>
                             <span wire:loading wire:target="calculateRouteDistance" class="inline-flex items-center gap-2">
-                                <span class="inline-block h-3 w-3 rounded-full border-2 border-white border-t-transparent animate-spin" aria-hidden="true"></span>
+                                <span class="inline-block h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" aria-hidden="true"></span>
                                 {{ __('app.please_wait') }}
                             </span>
                         </button>
                         @if($routeSummary)
-                            <div class="shrink-0 inline-flex flex-wrap items-baseline gap-x-3 gap-y-1 text-base">
-                                <span class="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1.5 text-blue-800">
-                                    <span class="text-blue-600 font-medium text-sm">{{ __('app.orders.route_calc.distance') }}:</span>
+                            <div class="flex flex-col sm:flex-row flex-wrap gap-2 min-w-0">
+                                <span class="inline-flex flex-col sm:flex-row sm:items-baseline gap-0.5 rounded-md bg-blue-50 px-2.5 py-1.5 text-blue-800 text-sm min-w-0">
+                                    <span class="text-blue-600 font-medium shrink-0">{{ __('app.orders.route_calc.distance') }}:</span>
                                     <strong>{{ number_format($routeSummary['distance_km'], 0, '.', ' ') }} km</strong>
                                 </span>
-                                <span class="text-gray-400">·</span>
-                                <span class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1.5 text-emerald-800">
-                                    <span class="text-emerald-600 font-medium text-sm">{{ __('app.orders.route_calc.duration') }}:</span>
+                                <span class="inline-flex flex-col sm:flex-row sm:items-baseline gap-0.5 rounded-md bg-emerald-50 px-2.5 py-1.5 text-emerald-800 text-sm min-w-0">
+                                    <span class="text-emerald-600 font-medium shrink-0">{{ __('app.orders.route_calc.duration') }}:</span>
                                     <strong>{{ $this->formatRouteDuration($routeSummary['duration_minutes']) }}</strong>
                                 </span>
                             </div>
