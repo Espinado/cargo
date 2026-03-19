@@ -1,8 +1,8 @@
 {
-  "name": "Cargo Trans",
-  "short_name": "Cargo Trans",
+  "name": "Cargo TMS",
+  "short_name": "Cargo TMS",
   "version": "1.3",
-  "description": "Админка Cargo Trans",
+  "description": "Админка Cargo TMS",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -10,13 +10,13 @@
   "theme_color": "#0d6efd",
   "icons": [
     {
-      "src": "/images/icons/cargo-logo-192.png",
+      "src": "/images/icons/cargo-tms-logo-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/images/icons/cargo-logo-512.png",
+      "src": "/images/icons/cargo-tms-logo-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"

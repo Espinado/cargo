@@ -11,8 +11,8 @@ $wrapperClass = $isCompact
 @endphp
 
 <div {{ $attributes->merge(['class' => $wrapperClass]) }}>
-    <img src="{{ asset('images/icons/cargo-logo.png') }}"
-         alt="Cargo Trans"
+    <img src="{{ asset(config('app.logo.path')) }}"
+         alt="Cargo TMS"
          class="{{ $imgClass }}"
          loading="lazy"
     >

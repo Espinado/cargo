@@ -1,8 +1,8 @@
-# Administratora rokasgrāmata — Cargo Trans
+# Administratora rokasgrāmata — Cargo TMS
 
 **Krievu valodā:** [manager-manual.md](manager-manual.md)
 
-Detalizēti norādījumi darbam ar **Cargo Trans** tīmekļa lietotni: visi sadalījumi, uzlabojumi un galvenās darbības lietotājam ar pilnu piekļuvi (administrators/vadītājs).
+Detalizēti norādījumi darbam ar **Cargo TMS** tīmekļa lietotni: visi sadalījumi, uzlabojumi un galvenās darbības lietotājam ar pilnu piekļuvi (administrators/vadītājs).
 
 ---
 
@@ -283,4 +283,4 @@ Remontu un apkopes izmaksas tiek ieskaitītas **finanšu rādītājos** (īpašn
 
 ---
 
-*Rokasgrāmatas versija: 2.0. Cargo Trans — administratora/vadītāja tīmekļa kabinets. Ņemts vērā: trešo pārvadātāju uzziņu grāmata, pasūtījumu konsolidācija reisā, parka apkope (apkope, dokumenti ar beidzamo termiņu, ierakstu žurnāls, izdevumu sadalījums), īpašnieka panelis, publiska reisa izsekošana, mobilā versija.*
+*Rokasgrāmatas versija: 2.0. Cargo TMS — administratora/vadītāja tīmekļa kabinets. Ņemts vērā: trešo pārvadātāju uzziņu grāmata, pasūtījumu konsolidācija reisā, parka apkope (apkope, dokumenti ar beidzamo termiņu, ierakstu žurnāls, izdevumu sadalījums), īpašnieka panelis, publiska reisa izsekošana, mobilā versija.*

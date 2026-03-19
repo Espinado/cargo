@@ -5,10 +5,10 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-    <title>{{ $title ?? config('app.name', 'Cargo Trans') . ' — ' . __('app.driver.app_short') }}</title>
+    <title>{{ $title ?? config('app.name', 'Cargo TMS') . ' — ' . __('app.driver.app_short') }}</title>
 
-    <link rel="icon" href="/images/icons/cargo-logo-192.png">
-    <link rel="apple-touch-icon" href="/images/icons/cargo-logo-512.png">
+    <link rel="icon" href="{{ asset(config('app.logo.path_192')) }}">
+    <link rel="apple-touch-icon" href="{{ asset(config('app.logo.path_512')) }}">
 
     <link rel="manifest" href="/driver/manifest.webmanifest">
 

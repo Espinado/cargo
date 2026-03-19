@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Cargo Trans'),
+    'name' => env('APP_NAME', 'Cargo TMS'),
 
     /*
     |--------------------------------------------------------------------------
@@ -21,6 +21,9 @@ return [
     |--------------------------------------------------------------------------
     */
     'logo' => [
+        'path' => env('APP_LOGO', 'images/icons/cargo-tms-logo.svg'),
+        'path_192' => env('APP_LOGO_192', 'images/icons/cargo-tms-logo-192.png'),
+        'path_512' => env('APP_LOGO_512', 'images/icons/cargo-tms-logo-512.png'),
         'width' => 96,
         'height' => 96,
         'sidebar_width' => 40,

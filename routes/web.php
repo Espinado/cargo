@@ -95,7 +95,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         $url = 'https://a.tile.openstreetmap.org/' . $z . '/' . $x . '/' . $y . '.png';
         $response = \Illuminate\Support\Facades\Http::timeout(8)
             ->withHeaders([
-                'User-Agent' => config('app.name', 'CargoTrans') . '/1.0 (+' . config('app.url', '') . ')',
+                'User-Agent' => config('app.name', 'Cargo TMS') . '/1.0 (+' . config('app.url', '') . ')',
             ])
             ->get($url);
         if (!$response->successful()) {

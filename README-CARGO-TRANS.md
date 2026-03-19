@@ -1,10 +1,10 @@
-# Cargo Trans
+# Cargo TMS
 
-Копия проекта Fleet Manager, настроенная как отдельное приложение **Cargo Trans** с подключением к базе данных **cargo**.
+Копия проекта Fleet Manager, настроенная как отдельное приложение **Cargo TMS** с подключением к базе данных **cargo**.
 
 ## Отличия от Fleet Manager
 
-- **Название приложения:** Cargo Trans
+- **Название приложения:** Cargo TMS
 - **База данных:** `cargo` (те же параметры: MySQL, host 127.0.0.1, port 3306, user root, без пароля)
 - **URL по умолчанию:** http://cargo-trans.test
 
@@ -38,7 +38,7 @@
 
 Основные параметры уже заданы в `.env`:
 
-- `APP_NAME="Cargo Trans"`
+- `APP_NAME="Cargo TMS"`
 - `APP_URL=http://cargo-trans.test`
 - `DB_CONNECTION=mysql`
 - `DB_DATABASE=cargo`

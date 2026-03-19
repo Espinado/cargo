@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Hash;
 class EnsureCargoTransAdmin extends Command
 {
     protected $signature = 'cargo-trans:ensure-admin';
-    protected $description = 'Create or update Cargo Trans admin (rvr@arguss.lv / 12345)';
+    protected $description = 'Create or update Cargo TMS admin (rvr@arguss.lv / 12345)';
 
     public function handle(): int
     {

@@ -6,11 +6,11 @@
     <link rel="manifest" href="/admin/manifest.webmanifest">
 
     {{-- Apple PWA meta --}}
-    <link rel="apple-touch-icon" href="/images/icons/cargo-logo-192.png">
+    <link rel="apple-touch-icon" href="{{ asset(config('app.logo.path_192')) }}">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="{{ config('app.name', 'Cargo Trans') }}">
-    <meta name="application-name" content="{{ config('app.name', 'Cargo Trans') }}">
+    <meta name="apple-mobile-web-app-title" content="{{ config('app.name', 'Cargo TMS') }}">
+    <meta name="application-name" content="{{ config('app.name', 'Cargo TMS') }}">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <meta charset="utf-8">
@@ -20,7 +20,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
 
-    <title>{{ config('app.name', 'Cargo Trans') }} - @yield('title')</title>
+    <title>{{ config('app.name', 'Cargo TMS') }} - @yield('title')</title>
 
     {{-- jQuery + Select2 (для всех select2-полей в админке) --}}
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -53,8 +53,8 @@
            class="w-64 bg-white shadow-md fixed md:static inset-y-0 left-0 transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40">
         <div class="p-4 border-b flex justify-between items-center gap-2">
             <div class="flex items-center gap-2 min-w-0">
-                <img src="{{ asset('images/icons/cargo-logo.png') }}" alt="{{ config('app.name', 'Cargo Trans') }}" class="rounded-lg shrink-0 object-cover" style="width: {{ config('app.logo.sidebar_width', 40) }}px; height: {{ config('app.logo.sidebar_height', 40) }}px;">
-                <span class="text-lg font-bold text-gray-800 truncate">{{ config('app.name', 'Cargo Trans') }}</span>
+                <img src="{{ asset(config('app.logo.path')) }}" alt="{{ config('app.name', 'Cargo TMS') }}" class="rounded-lg shrink-0 object-cover" style="width: {{ config('app.logo.sidebar_width', 40) }}px; height: {{ config('app.logo.sidebar_height', 40) }}px;">
+                <span class="text-lg font-bold text-gray-800 truncate">{{ config('app.name', 'Cargo TMS') }}</span>
             </div>
             <button id="closeSidebar" class="md:hidden text-gray-500 hover:text-gray-700 text-xl shrink-0">✖</button>
         </div>

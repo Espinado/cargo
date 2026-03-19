@@ -17,7 +17,7 @@ class ErrorReport extends Mailable
 
     public function build()
     {
-        $subject = '[Cargo Trans] Ошибка: ' . \Str::limit($this->exception->getMessage(), 60);
+        $subject = '[Cargo TMS] Ошибка: ' . \Str::limit($this->exception->getMessage(), 60);
 
         return $this
             ->to('rvr@arguss.lv')

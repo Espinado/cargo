@@ -44,8 +44,8 @@ new #[Layout('layouts.guest')] class extends Component
     <div class="w-full max-w-md space-y-8">
         {{-- Logotips — как в Fleet Manager: лого 96×96, снизу текст --}}
         <div class="flex flex-col items-center animate-fade-in">
-            <img src="{{ asset('images/icons/cargo-logo.png') }}" alt="{{ config('app.name', 'Cargo Trans') }}" class="rounded-2xl shadow-md mb-4 object-cover" style="width: {{ config('app.logo.width', 96) }}px; height: {{ config('app.logo.height', 96) }}px;">
-            <h1 class="text-3xl font-bold text-gray-800 tracking-tight">{{ config('app.name', 'Cargo Trans') }}</h1>
+            <img src="{{ asset(config('app.logo.path')) }}" alt="{{ config('app.name', 'Cargo TMS') }}" class="rounded-2xl shadow-md mb-4 object-cover" style="width: {{ config('app.logo.width', 96) }}px; height: {{ config('app.logo.height', 96) }}px;">
+            <h1 class="text-3xl font-bold text-gray-800 tracking-tight">{{ config('app.name', 'Cargo TMS') }}</h1>
         </div>
 
         {{-- Pieteikšanās forma --}}
@@ -121,7 +121,7 @@ new #[Layout('layouts.guest')] class extends Component
 
         {{-- Kājene --}}
         <p class="text-xs text-gray-500 text-center mt-6">
-            © {{ now()->year }} {{ config('app.name', 'Cargo Trans') }}
+            © {{ now()->year }} {{ config('app.name', 'Cargo TMS') }}
         </p>
     </div>
 

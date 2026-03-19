@@ -1,4 +1,4 @@
-# Анализ пробелов: Fleet Manager / Cargo Trans vs полноценная TMS
+# Анализ пробелов: Fleet Manager / Cargo TMS vs полноценная TMS
 
 Сравнение текущего функционала с типичными модулями и возможностями Transport Management System (TMS).
 
